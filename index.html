@@ -456,7 +456,7 @@ function renderContent(){
   h+=sec('1','Năng lực đặc thù: yêu cầu cần đạt','Chương trình 2018 là gốc · tick để đưa vào mục tiêu',
     st.phan==='tv'?`<div class="group-title">SGK nêu cho phần tiếng Việt</div>${y1||`<p class="src">Nội dung thực hành: ${esc(b.tv_toc)}.</p>`}${!y1&&!y2?`<p class="tv-note">Đây là nội dung luyện tập thêm, yêu cầu cần đạt không được nêu rõ trong SGK bài này và Chương trình tổng thể Ngữ văn lớp ${L}. Thầy Cô vui lòng tự xác định.</p><div class="write"><label for="tv-yc">Yêu cầu cần đạt do Thầy Cô xác định</label><textarea id="tv-yc" placeholder="Ví dụ: Nhận biết và phân tích được tác dụng của biện pháp tu từ … trong văn bản …">${esc((st.tvYc||{})[b.id]||'')}</textarea></div>`:''}${y2?`<div class="group-title">Kiến thức tiếng Việt trong chương trình lớp ${L}</div>${y2}`:''}`
     :`<div class="group-title">SGK có nêu, khớp chương trình</div>${y1||'<p class="empty">Chưa khớp được.</p>'}
-     <div class="group-title">Chương trình có cho ${st.phan==='doc'?'thể loại':'mạch'} này, SGK không nêu</div><p class="src">GV cân nhắc bổ sung theo mục tiêu của bài.</p>${y2||'<p class="empty">Không có.</p>'}`);
+     <div class="group-title">Một số YCCĐ ngoài SGK có thể cân nhắc chọn thêm (theo Chương trình tổng thể môn Ngữ văn)</div><p class="src">GV cân nhắc bổ sung theo mục tiêu của bài.</p>${y2||'<p class="empty">Không có.</p>'}`);
 
   // 2. Tri thức
   if(st.phan==='doc'){
