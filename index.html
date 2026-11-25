@@ -1,0 +1,658 @@
+<meta charset="utf-8">
+<title>V-SMART</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@400;500;600;700&family=Lora:ital,wght@0,500;0,600;1,500&family=JetBrains+Mono:wght@500&display=swap">
+<style>
+/* Layout: thanh trên cố định với 2 chế độ; Soạn KHBD = cột chọn bài bên trái + nội dung bài bên phải; thu thành 1 cột trên điện thoại */
+:root{
+  --bg:#f7f3fb; --grad:radial-gradient(1200px 700px at 0% 0%,#f9d9e6 0%,transparent 60%),radial-gradient(1000px 700px at 100% 10%,#d7e6fb 0%,transparent 55%),radial-gradient(900px 700px at 50% 100%,#dff3ea 0%,transparent 60%),linear-gradient(160deg,#fbf4fb,#f1f5fc);
+  --panel:rgba(255,255,255,.62); --panel-solid:#ffffff; --fg:#2a2340; --muted:#665f7c; --line:rgba(98,84,140,.18);
+  --accent:#6a3fa0; --accent-2:#c2577f; --accent-soft:rgba(106,63,160,.10); --warn:#a1501e; --warn-soft:rgba(232,150,90,.18);
+  --chip:rgba(255,255,255,.55); --sel:rgba(106,63,160,.14); --on-accent:#ffffff;
+  --f-body:"Be Vietnam Pro",system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;
+  --f-disp:"Lora",Georgia,"Times New Roman",serif;
+  --f-code:"JetBrains Mono",ui-monospace,Menlo,Consolas,monospace;
+}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]){
+  --bg:#17142a; --grad:radial-gradient(1200px 700px at 0% 0%,#3a2147 0%,transparent 60%),radial-gradient(1000px 700px at 100% 10%,#1f2e52 0%,transparent 55%),radial-gradient(900px 700px at 50% 100%,#173a36 0%,transparent 60%),linear-gradient(160deg,#18142b,#121a2c);
+  --panel:rgba(32,28,54,.62); --panel-solid:#211d38; --fg:#efeaf8; --muted:#b3aacb; --line:rgba(200,185,240,.16);
+  --accent:#c6a5f2; --accent-2:#f29bbd; --accent-soft:rgba(198,165,242,.14); --warn:#f2b27c; --warn-soft:rgba(242,178,124,.16);
+  --chip:rgba(255,255,255,.07); --sel:rgba(198,165,242,.20); --on-accent:#1b1630; color-scheme:dark}}
+:root[data-theme="dark"]{--bg:#17142a; --grad:radial-gradient(1200px 700px at 0% 0%,#3a2147 0%,transparent 60%),radial-gradient(1000px 700px at 100% 10%,#1f2e52 0%,transparent 55%),radial-gradient(900px 700px at 50% 100%,#173a36 0%,transparent 60%),linear-gradient(160deg,#18142b,#121a2c);
+  --panel:rgba(32,28,54,.62); --panel-solid:#211d38; --fg:#efeaf8; --muted:#b3aacb; --line:rgba(200,185,240,.16);
+  --accent:#c6a5f2; --accent-2:#f29bbd; --accent-soft:rgba(198,165,242,.14); --warn:#f2b27c; --warn-soft:rgba(242,178,124,.16);
+  --chip:rgba(255,255,255,.07); --sel:rgba(198,165,242,.20); --on-accent:#1b1630; color-scheme:dark}
+*{box-sizing:border-box}
+[hidden]{display:none!important}
+body{background:var(--bg);background-image:var(--grad);background-attachment:fixed;min-height:100vh;color:var(--fg);font-family:var(--f-body);font-size:15px;line-height:1.55}
+body::before{content:"";position:fixed;inset:0 0 auto;height:env(safe-area-inset-top,0px);z-index:10;background:var(--panel-solid)}
+.wrap{padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));max-width:1600px;margin:0 auto}
+header{position:sticky;top:env(safe-area-inset-top,0px);z-index:5;background:var(--panel);backdrop-filter:blur(18px) saturate(1.4);-webkit-backdrop-filter:blur(18px) saturate(1.4);border-bottom:1px solid var(--line)}
+header .wrap{display:flex;flex-wrap:wrap;align-items:center;gap:12px 20px;padding-block:12px}
+.brand{font-family:var(--f-disp);font-weight:600;font-size:22px;letter-spacing:-.01em;background:linear-gradient(90deg,var(--accent),var(--accent-2));-webkit-background-clip:text;background-clip:text;color:transparent}
+.brand small{-webkit-text-fill-color:var(--muted)}
+.brand small{display:block;font-family:var(--f-body);font-weight:500;font-size:12px;color:var(--muted);letter-spacing:0}
+nav.modes{display:flex;gap:4px;background:var(--chip);padding:4px;border-radius:10px}
+nav.modes button{border:0;background:transparent;font:inherit;font-weight:600;padding:7px 14px;border-radius:7px;color:var(--muted);cursor:pointer}
+nav.modes button[aria-pressed="true"]{background:var(--panel-solid);color:var(--fg);box-shadow:0 1px 2px rgba(0,0,0,.08)}
+.demo{margin-left:auto;font-size:12px;color:var(--accent);background:var(--accent-soft);border:1px solid var(--line);padding:4px 10px;border-radius:999px;font-weight:600}
+main .wrap{padding-block:20px 60px}
+button:focus-visible,input:focus-visible,select:focus-visible,summary:focus-visible,a:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+h2{font-family:var(--f-disp);font-weight:600;font-size:28px;line-height:1.25;margin:0 0 4px;text-wrap:balance;letter-spacing:-.01em}
+h3{font-family:var(--f-disp);font-weight:600;font-size:18px;margin:0;letter-spacing:-.005em}
+.lead{color:var(--muted);margin:0}
+.code{font-family:var(--f-code);font-size:12px;color:var(--accent);background:var(--accent-soft);padding:1px 6px;border-radius:5px;white-space:nowrap}
+.src{font-size:12px;color:var(--muted)}
+/* Soạn KHBD */
+.soan{display:grid;grid-template-columns:300px minmax(0,1fr);gap:24px;align-items:start}
+@media (max-width:860px){.soan{grid-template-columns:minmax(0,1fr)}}
+.picker{position:sticky;top:calc(env(safe-area-inset-top,0px) + 76px);display:flex;flex-direction:column;gap:12px}
+@media (max-width:860px){.picker{position:static}}
+.grades{display:flex;flex-wrap:wrap;gap:6px}
+.grades button{font:inherit;font-weight:600;border:1px solid var(--line);background:var(--chip);color:var(--fg);border-radius:8px;padding:6px 0;width:32px;cursor:pointer}
+.grades button[aria-pressed="true"]{background:linear-gradient(135deg,var(--accent),var(--accent-2));border-color:transparent;color:var(--on-accent)}
+.grades button:disabled{opacity:.45;cursor:not-allowed}
+.lessons{display:flex;flex-direction:column;gap:4px;max-height:62vh;overflow:auto;padding-right:2px}
+@media (max-width:860px){.lessons{max-height:none}}
+.lessons button{font:inherit;text-align:left;border:0;background:transparent;color:var(--fg);padding:8px 10px;border-radius:8px;cursor:pointer;display:grid;grid-template-columns:auto 1fr;gap:8px}
+.lessons button:hover{background:var(--chip)}
+.lessons button[aria-pressed="true"]{background:var(--sel)}
+.lessons .n{font-family:var(--f-code);font-size:12px;color:var(--muted);padding-top:3px}
+.note{font-size:13px;color:var(--muted);background:var(--chip);backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px);border:1px solid var(--line);border-radius:8px;padding:10px 12px}
+.content{display:flex;flex-direction:column;gap:18px;min-width:0}
+.sec{background:var(--panel);backdrop-filter:blur(16px) saturate(1.3);-webkit-backdrop-filter:blur(16px) saturate(1.3);box-shadow:0 8px 30px rgba(60,40,110,.08),inset 0 1px 0 rgba(255,255,255,.35);border:1px solid var(--line);border-radius:16px;padding:16px 18px;display:flex;flex-direction:column;gap:10px;min-width:0}
+.sec>header{position:static;background:none;border:0;display:flex;align-items:baseline;gap:10px;flex-wrap:wrap}
+.sec .step{font-family:var(--f-code);font-size:12px;color:var(--muted)}
+.item{display:grid;grid-template-columns:auto minmax(0,1fr);gap:10px;align-items:start;padding:8px 10px;border-radius:8px}
+.item:hover{background:var(--chip)}
+.item input{margin-top:4px;width:16px;height:16px;accent-color:var(--accent)}
+.item .meta{display:flex;flex-wrap:wrap;gap:6px;align-items:center;margin-top:3px}
+.tag{font-size:11px;font-weight:600;padding:1px 7px;border-radius:999px;background:var(--chip);color:var(--muted)}
+.tag.warn{background:var(--warn-soft);color:var(--warn)}
+.tag.ok{background:var(--accent-soft);color:var(--accent)}
+.group-title{font-size:12px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:var(--muted);margin-top:6px}
+details{border:1px solid var(--line);border-radius:10px;padding:0 12px}
+details+details{margin-top:6px}
+summary{cursor:pointer;padding:10px 0;font-weight:600;list-style-position:outside}
+details[open] summary{border-bottom:1px solid var(--line);margin-bottom:8px}
+ul.plain{margin:0 0 10px;padding-left:18px}
+ul.plain li{margin:3px 0}
+.write{display:flex;flex-direction:column;gap:6px;margin:6px 0 10px}
+.write label{font-size:13px;font-weight:600}
+.write input,.write textarea,.search,select{font:inherit;color:var(--fg);background:var(--panel-solid);border:1px solid var(--line);border-radius:8px;padding:8px 10px;width:100%}
+.write textarea{min-height:54px;resize:vertical}
+.btn{font:inherit;font-weight:600;border:1px solid transparent;background:linear-gradient(135deg,var(--accent),var(--accent-2));color:var(--on-accent);padding:8px 14px;border-radius:8px;cursor:pointer}
+.btn.ghost{background:var(--chip);border-color:var(--line);color:var(--accent)}
+.btn:disabled{opacity:.5;cursor:not-allowed}
+.row{display:flex;flex-wrap:wrap;gap:8px;align-items:center}
+.table-wrap{overflow-x:auto}
+table.obj{border-collapse:collapse;width:100%;min-width:520px;font-size:14px}
+table.obj th,table.obj td{border:1px solid var(--line);padding:7px 10px;vertical-align:top;text-align:left}
+table.obj th{background:var(--accent-soft);font-size:13px}
+table.obj td.m{font-family:var(--f-code);font-size:12px;white-space:nowrap;width:64px;text-align:center}
+table.obj tr.h td{font-weight:700;background:var(--accent-soft)}
+.empty{color:var(--muted);font-style:italic}
+.hero-empty{padding:28px;text-align:left}
+.lesson{display:grid;grid-template-columns:minmax(0,1fr) minmax(380px,540px);gap:20px;align-items:start}
+.secs{display:flex;flex-direction:column;gap:18px;min-width:0}
+.viewer{position:sticky;top:calc(env(safe-area-inset-top,0px) + 76px);background:var(--panel);backdrop-filter:blur(16px) saturate(1.3);-webkit-backdrop-filter:blur(16px) saturate(1.3);box-shadow:0 8px 30px rgba(60,40,110,.08),inset 0 1px 0 rgba(255,255,255,.35);border:1px solid var(--line);border-radius:16px;padding:12px;display:flex;flex-direction:column;gap:8px}
+.viewer .pg{max-height:calc(100vh - 190px);overflow:auto;border-radius:6px;background:var(--chip)}
+.viewer img{display:block;width:100%;height:auto;background:#fff;cursor:zoom-in}
+.viewer .pg.zoom img{width:170%;max-width:none;cursor:zoom-out}
+.viewer .thumbs{display:flex;gap:6px;overflow-x:auto}
+.viewer .thumbs button{font:inherit;font-size:12px;border:1px solid var(--line);background:var(--chip);color:var(--fg);border-radius:6px;padding:3px 8px;cursor:pointer;white-space:nowrap}
+.viewer .thumbs button[aria-pressed="true"]{background:linear-gradient(135deg,var(--accent),var(--accent-2));color:var(--on-accent);border-color:transparent}
+@media (max-width:1180px){.lesson{grid-template-columns:minmax(0,1fr)}.viewer{position:static;order:-1}.viewer .pg{max-height:70vh}}
+/* Thư viện */
+.lib{display:grid;grid-template-columns:220px minmax(0,1fr);gap:24px;align-items:start}
+@media (max-width:860px){.lib{grid-template-columns:minmax(0,1fr)}}
+.libnav{display:flex;flex-direction:column;gap:2px}
+@media (max-width:860px){.libnav{flex-direction:row;flex-wrap:wrap;gap:6px}}
+.libnav button{font:inherit;text-align:left;border:0;background:transparent;color:var(--fg);padding:8px 10px;border-radius:8px;cursor:pointer}
+@media (max-width:860px){.libnav button{background:var(--chip)}}
+.libnav button[aria-pressed="true"]{background:var(--sel);font-weight:600}
+.filters{display:flex;flex-wrap:wrap;gap:8px}
+.filters select{width:auto}
+.filters .search{flex:1 1 220px}
+.cards{display:flex;flex-direction:column;gap:8px}
+.yc{background:var(--panel);backdrop-filter:blur(16px) saturate(1.3);-webkit-backdrop-filter:blur(16px) saturate(1.3);box-shadow:0 8px 30px rgba(60,40,110,.08),inset 0 1px 0 rgba(255,255,255,.35);border:1px solid var(--line);border-radius:12px;padding:10px 14px;display:flex;flex-direction:column;gap:4px}
+mark{background:var(--warn-soft);color:inherit;padding:0 2px;border-radius:3px}
+.toast{position:fixed;left:50%;bottom:calc(20px + env(safe-area-inset-bottom,0px));transform:translateX(-50%);background:var(--fg);color:var(--panel-solid);padding:8px 14px;border-radius:8px;font-size:14px;z-index:20}
+@media (prefers-reduced-motion:no-preference){.sec{animation:in .25s ease-out}@keyframes in{from{transform:translateY(4px)}to{transform:none}}}
+
+
+.sec.acc{padding:0;gap:0;border-radius:20px;margin:0}
+.sec.acc+.sec.acc{margin-top:0}
+.acc>summary{list-style:none;display:flex;align-items:center;gap:12px;padding:16px 20px;margin:0;border:0;cursor:pointer}
+.acc>summary::-webkit-details-marker{display:none}
+.acc[open]>summary{border-bottom:1px solid var(--line);margin:0}
+.acc-t{display:flex;flex-direction:column;gap:2px;flex:1;min-width:0}
+.acc-t .src{font-weight:400}
+.cnt{font-size:12px;font-weight:600;padding:3px 10px;border-radius:999px;white-space:nowrap}
+.cnt.on{background:var(--accent-soft);color:var(--accent)}
+.chev{width:10px;height:10px;border-right:2px solid var(--muted);border-bottom:2px solid var(--muted);transform:rotate(45deg);transition:transform .2s;margin:0 4px 4px}
+.acc[open] .chev{transform:rotate(-135deg);margin-bottom:-4px}
+.acc:not([open]):hover{box-shadow:0 10px 34px rgba(60,40,110,.13)}
+.acc-b{padding:14px 20px 20px;display:flex;flex-direction:column;gap:10px}
+.nx{justify-content:flex-end;margin-top:6px}
+.secs{gap:12px}
+/* ---- v7 refresh ---- */
+.objlist .op{margin:2px 0 8px}
+
+.tag.atm{background:linear-gradient(135deg,#f2a25c,#e07a5f);color:#fff}
+.atm-card{border:1px solid var(--line);border-radius:12px;padding:10px 12px;margin-top:6px;background:var(--chip);display:flex;flex-direction:column;gap:4px}
+.atm-card .src b{color:var(--fg)}
+.atm-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:12px}
+.atm-grid .yc b{font-family:var(--f-disp);font-size:16px}
+
+.dd{position:relative;display:inline-block;max-width:100%}
+.dd .vb-sel{text-align:left}
+.dd-menu{position:absolute;left:0;top:calc(100% + 6px);z-index:12;min-width:100%;width:max-content;max-width:min(460px,80vw);background:rgba(255,255,255,.92);backdrop-filter:blur(16px);-webkit-backdrop-filter:blur(16px);border:1px solid color-mix(in srgb,var(--h) 18%,transparent);border-radius:14px;box-shadow:0 16px 40px rgba(60,40,110,.16);padding:6px;display:flex;flex-direction:column}
+.dd-menu .dd-g{margin:8px 10px 2px;font-size:11px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--h)}
+.dd-menu button{font:inherit;font-size:13.5px;text-align:left;border:0;background:transparent;color:#2a2340;padding:7px 10px;border-radius:9px;cursor:pointer;display:flex;flex-direction:column;gap:1px}
+.dd-menu button span{font-size:12px;color:#665f7c}
+.dd-menu button:hover{background:color-mix(in srgb,var(--h) 9%,transparent)}
+.dd-menu button[aria-selected="true"]{background:color-mix(in srgb,var(--h) 14%,transparent);font-weight:600}
+
+.vbs .group-title{display:block}
+.vb-sel{appearance:none;-webkit-appearance:none;width:auto;min-width:260px;max-width:100%;font-family:var(--f-body);font-size:13.5px;font-weight:500;padding:7px 34px 7px 12px;border-radius:10px;border:1px solid color-mix(in srgb,var(--h) 18%,transparent);background:color-mix(in srgb,var(--h) 7%,#fff) url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8'%3E%3Cpath d='M1 1l5 5 5-5' fill='none' stroke='%238a5cc8' stroke-width='2'/%3E%3C/svg%3E") no-repeat right 14px center;color:var(--fg);cursor:pointer}
+
+.ai-btn{margin-top:14px;display:inline-flex;align-items:center;gap:10px;font:inherit;font-weight:600;font-size:15px;cursor:pointer;color:#fff;border:0;padding:11px 20px 11px 14px;border-radius:999px;background:linear-gradient(120deg,#e07a9f,#8a5cc8 50%,#4aa3b5);background-size:200% 100%;box-shadow:0 10px 26px rgba(138,92,200,.35);transition:background-position .5s,transform .2s}
+.ai-btn:hover{background-position:100% 0;transform:translateY(-1px)}
+.ai-btn .spark{width:28px;height:28px;border-radius:50%;display:grid;place-items:center;background:rgba(255,255,255,.25);font-size:15px}
+.ai-modal{max-width:620px}
+.soon{align-self:flex-start;font-size:13px;font-weight:700;padding:6px 14px;border-radius:999px;background:var(--accent-soft);color:var(--accent)}
+
+.vbs{margin-top:10px}
+.vbs .group-title{margin:0 0 6px;color:var(--h)}
+.vb-list{display:flex;flex-wrap:wrap;gap:8px}
+.vb-list button{font:inherit;text-align:left;cursor:pointer;display:flex;flex-direction:column;gap:1px;padding:8px 12px;border-radius:14px;border:1px solid color-mix(in srgb,var(--h) 25%,transparent);background:rgba(255,255,255,.6);color:var(--fg);max-width:100%}
+.vb-list button b{font-family:var(--f-disp);font-weight:600;font-size:15px}
+.vb-list button span{font-size:12px;color:var(--muted)}
+.vb-list button i{font-style:normal;font-size:11px;font-weight:700;color:var(--h);text-transform:uppercase;letter-spacing:.06em}
+.vb-list button[aria-pressed="true"]{background:#fff;border-color:var(--h);box-shadow:0 0 0 2px color-mix(in srgb,var(--h) 35%,transparent)}
+
+.objlist{border:1px solid var(--line);border-radius:14px;padding:16px 20px;background:var(--chip);user-select:text}
+.objlist p{margin:0 0 6px}
+.objlist .oh{font-weight:700;margin-top:8px}
+.objlist .oh2{font-weight:600;font-style:italic;margin-top:4px}
+.objlist .oi{padding-left:14px}
+
+.fab{position:fixed;right:max(20px,env(safe-area-inset-right,0px));bottom:calc(20px + env(safe-area-inset-bottom,0px));z-index:8;display:flex;align-items:center;gap:10px;font:inherit;text-align:left;border:0;cursor:pointer;color:#fff;padding:12px 20px 12px 14px;border-radius:999px;background:linear-gradient(135deg,#c2577f,#6a3fa0 60%,#3d8fa0);box-shadow:0 14px 34px rgba(106,63,160,.4)}
+.fab:hover{transform:translateY(-2px)}
+table.obj th:last-child{white-space:nowrap;width:80px;text-align:center}
+.fab b{display:block;font-size:15px}
+.fab #fab-n{font-size:12px;opacity:.9}
+.fab-i{width:34px;height:34px;border-radius:50%;display:grid;place-items:center;background:rgba(255,255,255,.22);font-size:18px}
+.ov{position:fixed;inset:0;z-index:30;background:rgba(40,25,70,.35);backdrop-filter:blur(6px);-webkit-backdrop-filter:blur(6px);display:grid;place-items:center;padding:16px}
+.modal{width:min(900px,100%);max-height:88vh;overflow:auto;background:var(--panel-solid);border-radius:24px;padding:24px;display:flex;flex-direction:column;gap:14px;box-shadow:0 30px 80px rgba(40,25,70,.35)}
+.modal .x{font:inherit;font-size:26px;line-height:1;width:40px;height:40px;border-radius:50%;border:1px solid var(--line);background:var(--chip);color:var(--fg);cursor:pointer;flex:none}
+
+.phan{display:flex;flex-wrap:wrap;gap:6px;margin:12px 0 6px}
+.phan button{font:inherit;font-weight:600;font-size:14px;border:1px solid color-mix(in srgb,var(--h) 30%,transparent);background:rgba(255,255,255,.55);color:var(--fg);padding:7px 14px;border-radius:999px;cursor:pointer}
+.phan button[aria-selected="true"]{background:var(--h);border-color:transparent;color:#fff;box-shadow:0 6px 16px color-mix(in srgb,var(--h) 35%,transparent)}
+
+.pgwrap{position:relative}
+.flip{position:absolute;top:50%;transform:translateY(-50%);width:44px;height:44px;border-radius:50%;border:1px solid rgba(255,255,255,.8);background:rgba(255,255,255,.72);backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px);color:#6a3fa0;font-size:28px;line-height:1;cursor:pointer;box-shadow:0 6px 18px rgba(60,40,110,.2);display:grid;place-items:center;padding:0 0 4px}
+.flip.l{left:10px}.flip.r{right:10px}
+.flip:hover{background:#fff}
+.flip:disabled{opacity:.3;cursor:default}
+#pg-lbl{font-family:var(--f-code);font-weight:600;color:var(--accent)}
+
+.bookart{position:absolute;inset:20px 0 10px;display:grid;place-items:center}
+.bookart svg{width:100%;max-width:440px;height:auto;filter:drop-shadow(0 20px 36px rgba(80,50,130,.22))}
+
+.tap2{display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:8px 24px}
+.lessons .group-title{margin:8px 10px 2px}
+
+.libnav{background:var(--panel);backdrop-filter:blur(16px);-webkit-backdrop-filter:blur(16px);border:1px solid var(--line);border-radius:20px;padding:10px;position:sticky;top:90px}
+@media (max-width:860px){.libnav{position:static}}
+.libnav button[aria-pressed="true"]{background:linear-gradient(90deg,var(--sel),transparent);box-shadow:inset 3px 0 0 var(--accent)}
+.acc-b .yc{background:var(--chip);box-shadow:none;backdrop-filter:none;-webkit-backdrop-filter:none}
+
+body{font-size:15.5px}
+header .wrap{padding-block:14px}
+.logo{display:flex;align-items:center;gap:10px;text-decoration:none;color:var(--fg)}
+.logo .mark{width:40px;height:40px;border-radius:12px;display:grid;place-items:center;font-family:var(--f-disp);font-weight:600;font-size:17px;color:#fff;background:linear-gradient(135deg,#e07a9f,#8a5cc8 55%,#4aa3b5);box-shadow:0 6px 18px rgba(138,92,200,.35)}
+.logo .wm{display:flex;flex-direction:column;line-height:1.1}
+.logo .wm b{font-size:13px;letter-spacing:.14em}
+.logo .wm i{font-family:var(--f-disp);font-style:normal;font-weight:600;font-size:22px;letter-spacing:.04em;background:linear-gradient(90deg,var(--accent-2),var(--accent));-webkit-background-clip:text;background-clip:text;color:transparent}
+nav.modes{background:none;border:0;padding:0;gap:26px;margin-left:18px}
+nav.modes button{padding:8px 2px;border-radius:0;position:relative;font-size:15.5px;transition:color .2s}
+nav.modes button:hover{color:var(--fg)}
+nav.modes button[aria-pressed="true"]{background:none;box-shadow:none;color:var(--accent)}
+nav.modes button::after{content:"";position:absolute;left:0;right:0;bottom:0;height:3px;border-radius:3px;background:linear-gradient(90deg,var(--accent-2),var(--accent));transform:scaleX(0);transition:transform .25s}
+nav.modes button[aria-pressed="true"]::after{transform:scaleX(1)}
+footer{border-top:1px solid var(--line);background:var(--panel);backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px)}
+footer .wrap{padding-block:22px;display:flex;flex-wrap:wrap;gap:8px 32px;justify-content:space-between}
+footer .ft{display:block;letter-spacing:.12em;font-size:13px;margin-bottom:2px}
+footer p{margin:0;max-width:420px}
+.eyebrow{font-size:12px;font-weight:700;letter-spacing:.14em;text-transform:uppercase;color:var(--accent-2);margin:0 0 6px}
+#v-home{display:flex;flex-direction:column;gap:6px}
+.hero{display:grid;grid-template-columns:minmax(0,1.25fr) minmax(0,.9fr);gap:40px;align-items:center;padding:36px 0 44px}
+@media (max-width:900px){.hero{grid-template-columns:minmax(0,1fr)}.hero-art{display:none}}
+h1{font-family:var(--f-disp);font-weight:600;font-size:clamp(32px,4.4vw,54px);line-height:1.12;letter-spacing:-.02em;margin:4px 0 16px;text-wrap:balance}
+h1 em{font-style:italic;background:linear-gradient(90deg,var(--accent-2),var(--accent) 60%,#3d8fa0);-webkit-background-clip:text;background-clip:text;color:transparent}
+.lead.big{font-size:17px;max-width:60ch;margin-bottom:22px}
+.btn.lg{padding:12px 20px;border-radius:12px;font-size:15px;box-shadow:0 8px 22px rgba(138,72,150,.22)}
+.btn.ghost.lg{box-shadow:none}
+.hero-art{position:relative;height:340px}
+.orb{position:absolute;border-radius:50%;filter:blur(2px);opacity:.85}
+.o1{width:220px;height:220px;left:6%;top:4%;background:radial-gradient(circle at 30% 30%,#ffd1e1,#e58bb0 70%)}
+.o2{width:180px;height:180px;right:4%;top:20%;background:radial-gradient(circle at 30% 30%,#e3d6ff,#9b7ae0 70%)}
+.o3{width:150px;height:150px;left:30%;bottom:0;background:radial-gradient(circle at 30% 30%,#d4f4ef,#6cc0c0 70%)}
+.pagecard{position:absolute;inset:40px 12% 30px 18%;background:rgba(255,255,255,.55);backdrop-filter:blur(18px) saturate(1.4);-webkit-backdrop-filter:blur(18px) saturate(1.4);border:1px solid rgba(255,255,255,.7);border-radius:20px;box-shadow:0 20px 50px rgba(80,50,130,.18);padding:22px;display:flex;flex-direction:column;gap:10px;transform:rotate(-3deg)}
+.pc-k{font-size:12px;letter-spacing:.1em;text-transform:uppercase;color:#8a5c9c;font-weight:700}
+.pc-t{font-family:var(--f-disp);font-size:22px;color:#2a2340;font-style:italic}
+.pc-l{height:8px;border-radius:4px;background:rgba(106,63,160,.14)}.pc-l.s{width:70%}
+.pc-chips{display:flex;gap:6px;margin-top:auto}.pc-chips i{font-style:normal;font-size:12px;font-weight:600;padding:3px 10px;border-radius:999px;background:rgba(194,87,127,.14);color:#a03f68}
+.h2-home{font-size:30px;margin-bottom:16px}
+.modes-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(300px,1fr));gap:18px;margin-bottom:28px}
+.mode-card{font:inherit;text-align:left;cursor:pointer;color:var(--fg);border:1px solid var(--line);border-radius:22px;padding:26px;display:flex;flex-direction:column;gap:10px;background:var(--panel);backdrop-filter:blur(16px) saturate(1.3);-webkit-backdrop-filter:blur(16px) saturate(1.3);box-shadow:0 10px 34px rgba(60,40,110,.08);position:relative;overflow:hidden;transition:transform .2s,box-shadow .2s}
+.mode-card::before{content:"";position:absolute;inset:0 0 auto;height:5px;background:linear-gradient(90deg,#e58bb0,#9b7ae0)}
+.mode-card.b::before{background:linear-gradient(90deg,#9b7ae0,#6cc0c0)}
+.mode-card:hover{transform:translateY(-3px);box-shadow:0 16px 40px rgba(60,40,110,.14)}
+.mode-card .mk{font-size:12px;font-weight:700;letter-spacing:.12em;text-transform:uppercase;color:var(--accent-2)}
+.mode-card.b .mk{color:#2f7f8a}
+.mode-card b{font-family:var(--f-disp);font-size:23px;font-weight:600;line-height:1.25}
+.mode-card>span:not(.mk){color:var(--muted)}
+.mode-card em{font-style:normal;font-weight:600;color:var(--accent);margin-top:4px}
+.stats{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:1px;background:var(--line);border:1px solid var(--line);border-radius:20px;overflow:hidden;margin-bottom:36px}
+@media (max-width:760px){.stats{grid-template-columns:repeat(2,minmax(0,1fr))}}
+.stats>div{background:var(--panel);backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px);padding:20px;display:flex;flex-direction:column;gap:4px}
+.stats b{font-family:var(--f-disp);font-size:40px;font-weight:600;line-height:1;background:linear-gradient(135deg,var(--accent-2),var(--accent));-webkit-background-clip:text;background-clip:text;color:transparent}
+.stats span{font-size:13px;color:var(--muted)}
+.quick{display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:18px}
+.qg{background:var(--panel);backdrop-filter:blur(16px) saturate(1.3);-webkit-backdrop-filter:blur(16px) saturate(1.3);border:1px solid var(--line);border-radius:20px;padding:16px;box-shadow:0 10px 30px rgba(60,40,110,.07)}
+.qg-h{display:flex;gap:12px;align-items:center;margin-bottom:10px}
+.qg-n{width:46px;height:46px;border-radius:14px;display:grid;place-items:center;font-family:var(--f-disp);font-size:22px;font-weight:600;color:#fff;background:linear-gradient(135deg,var(--h),color-mix(in srgb,var(--h) 55%,#fff))}
+.qg-h b{display:block;font-family:var(--f-disp);font-size:18px}
+.qg-list{display:flex;flex-direction:column;gap:2px}
+.qg-list button{font:inherit;font-size:14.5px;text-align:left;border:0;background:transparent;color:var(--fg);padding:7px 8px;border-radius:9px;cursor:pointer;display:flex;gap:10px;align-items:baseline}
+.qg-list button:hover{background:color-mix(in srgb,var(--h) 12%,transparent)}
+.qg-list .n{font-family:var(--f-code);font-size:12px;color:var(--h);min-width:14px}
+.tiles{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:12px}
+.tiles button{font:inherit;text-align:left;cursor:pointer;color:var(--fg);border:1px solid var(--line);border-radius:16px;padding:16px;background:var(--panel);backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px);display:flex;flex-direction:column;gap:4px;transition:transform .2s}
+.tiles button:hover{transform:translateY(-2px)}
+.tiles .ti{font-family:var(--f-disp);font-size:20px;color:var(--accent-2)}
+/* lesson page */
+.banner{border-radius:22px;padding:22px 24px;background:linear-gradient(120deg,color-mix(in srgb,var(--h) 22%,transparent),color-mix(in srgb,var(--h) 6%,transparent) 70%);border:1px solid color-mix(in srgb,var(--h) 25%,transparent)}
+.banner .eyebrow{color:var(--h)}
+.banner h2{font-size:32px}
+.sec{border-radius:20px;padding:20px 22px}
+.sec .step{width:28px;height:28px;border-radius:50%;display:inline-grid;place-items:center;color:#fff;font-weight:700;background:linear-gradient(135deg,var(--accent-2),var(--accent))}
+.sec>header{align-items:center}
+.picker{background:var(--panel);backdrop-filter:blur(16px);-webkit-backdrop-filter:blur(16px);border:1px solid var(--line);border-radius:20px;padding:16px}
+.grades button{border-radius:10px}
+.lessons button[aria-pressed="true"]{background:linear-gradient(90deg,var(--sel),transparent);box-shadow:inset 3px 0 0 var(--accent)}
+.viewer{border-radius:20px}
+.viewer img{border-radius:6px}
+details{background:rgba(255,255,255,.25)}
+:root[data-theme="dark"] details{background:rgba(255,255,255,.03)}
+</style>
+
+<header><div class="wrap">
+  <a class="logo" href="#" id="logo"><span class="mark">V</span><span class="wm"><i>V-SMART</i></span></a>
+  <nav class="modes" aria-label="Chế độ">
+    <button id="m-home" aria-pressed="true">Trang chủ</button>
+    <button id="m-soan" aria-pressed="false">Soạn KHBD</button>
+    <button id="m-lib" aria-pressed="false">Thư viện</button>
+  </nav>
+  <span class="demo">Bản thử nghiệm</span>
+</div></header>
+
+<main><div class="wrap">
+  <section id="v-home"></section>
+  <section id="v-soan" hidden>
+    <div class="soan">
+      <aside class="picker">
+        <div><h3>Chọn khối</h3></div>
+        <div class="grades" id="grades"></div>
+        <div><h3 id="lessons-h">Chọn bài</h3></div>
+        <div class="lessons" id="lessons"></div>
+        <div class="note" id="picker-note">Bản thử nghiệm: lớp 6–12 theo SGK thống nhất. Phần yêu cầu cần đạt của SGK được đối chiếu với chương trình và chờ thầy cô duyệt.</div>
+      </aside>
+      <div class="content" id="content"></div>
+    </div>
+  </section>
+  <section id="v-lib" hidden>
+    <div class="lib">
+      <nav class="libnav" id="libnav" aria-label="Thư viện"></nav>
+      <div class="content" id="libcontent"></div>
+    </div>
+  </section>
+</div></main>
+<footer><div class="wrap"><div><b class="ft">V-SMART</b><span class="src">Dành cho giáo viên Ngữ văn trung học · Chương trình 2018, CT tổng thể, TT 02/2025, CV 3456, CV 5512, SGK thống nhất</span></div><p class="src">Trang chỉ tra cứu và gợi ý. Giáo viên là người lựa chọn và viết mục tiêu cuối cùng.</p></div></footer>
+
+<script>
+(function(){
+const $=s=>document.querySelector(s);
+const esc=s=>String(s??'').replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+let D=null;
+const st={atm:{hs:'',qd:'',ct:'',pc:''},atmText:{},vb:null,phan:'doc',open:'1',lop:10,bai:null,sel:new Set(),nlc:{},pc:{},nls:new Set(),nlsText:{},th:new Set(),thText:{}};
+function toast(t){const e=document.createElement('div');e.className='toast';e.textContent=t;document.body.appendChild(e);setTimeout(()=>e.remove(),1800)}
+function store(k,v){try{localStorage.setItem(k,JSON.stringify(v))}catch(e){}}
+function load(k){try{return JSON.parse(localStorage.getItem(k))}catch(e){return null}}
+
+/* ---------- helpers ---------- */
+const ctBy=()=>{const m={};D.ct.forEach(k=>k.yccd.forEach(y=>m[y.id]=Object.assign({lop:k.khoi},y)));return m};
+let CTM={};
+const cap=l=>l>=10?'thpt':'thcs';
+const bac=l=>l<=7?'TC1':l<=9?'TC2':'NC1';
+function words(s){return (s||'').toLowerCase().normalize('NFC').replace(/[^\p{L}\p{N} ]/gu,' ').split(/\s+/).filter(w=>w.length>1)}
+function overlap(a,b){const A=words(a),B=new Set(words(b));if(!A.length)return 0;return A.filter(w=>B.has(w)).length/A.length}
+const loaiShort=new Proxy({},{get:(o,k)=>String(k).normalize('NFC').replace(/^Văn bản/,'VB')});
+
+/* ---------- mode switch ---------- */
+function setMode(m){['home','soan','lib'].forEach(k=>{$('#m-'+k).setAttribute('aria-pressed',m===k);$('#v-'+k).hidden=m!==k});store('mode',m);if(m==='lib')renderLib();if(m==='home')renderHome();window.scrollTo({top:0})}
+$('#m-home').onclick=()=>setMode('home');$('#m-soan').onclick=()=>setMode('soan');$('#m-lib').onclick=()=>setMode('lib');$('#logo').onclick=e=>{e.preventDefault();setMode('home')};
+const HUE={6:'#d0794a',7:'#b8892a',8:'#4f8a4c',9:'#3f6fb0',10:'#c2577f',11:'#6a3fa0',12:'#2f7f8a'};
+function renderHome(){
+  const nY=D.ct.reduce((a,k)=>a+k.yccd.length,0), nCB=D.nls.nang_luc.reduce((a,n)=>a+Object.values(n.bac).reduce((x,b)=>x+b.chi_bao.length,0),0);
+  const grades=[6,7,8,9,10,11,12].filter(l=>D.bai.some(b=>b.lop===l));
+  $('#v-home').innerHTML=`
+  <div class="hero">
+    <div class="hero-txt">
+      <p class="eyebrow">Chương trình 2018 · SGK thống nhất</p>
+      <h1>Từ chương trình đến từng <span style="white-space:nowrap">bài dạy,</span> <em>tra cứu trong một trang.</em></h1>
+      <p class="lead big">Chọn một bài để thấy ngay yêu cầu cần đạt của chương trình, tri thức Ngữ văn, năng lực chung, phẩm chất, năng lực số và nội dung tích hợp, đặt cạnh trang sách giáo khoa của chính bài đó.</p>
+      <div class="row"><button class="btn lg" data-go="soan">Bắt đầu soạn KHBD →</button><button class="btn ghost lg" data-go="lib">Mở thư viện</button></div>
+    </div>
+    <div class="hero-art" aria-hidden="true"><div class="orb o1"></div><div class="orb o2"></div><div class="orb o3"></div>
+      <div class="bookart"><svg viewBox="0 0 420 300" role="presentation">
+<defs>
+<linearGradient id="pgL" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#fff" stop-opacity=".92"/><stop offset="1" stop-color="#f6eefb" stop-opacity=".78"/></linearGradient>
+<linearGradient id="pgR" x1="1" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#fff" stop-opacity=".92"/><stop offset="1" stop-color="#eef6fb" stop-opacity=".78"/></linearGradient>
+<linearGradient id="cov" x1="0" y1="0" x2="1" y2="0"><stop offset="0" stop-color="#e07a9f"/><stop offset=".5" stop-color="#8a5cc8"/><stop offset="1" stop-color="#4aa3b5"/></linearGradient>
+<linearGradient id="qu" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#f4b8cf"/><stop offset="1" stop-color="#9b7ae0"/></linearGradient>
+</defs>
+<path d="M30 92 Q120 70 210 98 Q300 70 390 92 L390 258 Q300 236 210 264 Q120 236 30 258 Z" fill="url(#cov)" opacity=".9"/>
+<path d="M42 82 Q126 60 206 88 L206 250 Q126 224 42 244 Z" fill="url(#pgL)" stroke="rgba(255,255,255,.9)"/>
+<path d="M378 82 Q294 60 214 88 L214 250 Q294 224 378 244 Z" fill="url(#pgR)" stroke="rgba(255,255,255,.9)"/>
+<g fill="none" stroke="#8a5cc8" stroke-opacity=".28" stroke-width="5" stroke-linecap="round">
+<path d="M66 108 Q126 94 184 112"/><path d="M66 130 Q126 116 184 134"/><path d="M66 152 Q120 140 166 154"/><path d="M66 180 Q126 166 184 184"/><path d="M66 202 Q110 192 150 202"/>
+<path d="M236 112 Q294 94 354 108"/><path d="M236 134 Q294 116 354 130"/><path d="M254 154 Q300 140 354 152"/><path d="M236 184 Q294 166 354 180"/>
+</g>
+<path d="M210 96 L210 262" stroke="rgba(120,80,160,.25)" stroke-width="2"/>
+<g transform="translate(300 30) rotate(28)"><path d="M0 0 C30 20 34 80 6 150 C-22 80 -24 22 0 0 Z" fill="url(#qu)" opacity=".92"/><path d="M4 6 L5 150" stroke="#fff" stroke-opacity=".8" stroke-width="2"/></g>
+<g fill="#fff" opacity=".9"><circle cx="92" cy="40" r="3"/><circle cx="130" cy="22" r="2"/><circle cx="60" cy="58" r="2"/><circle cx="380" cy="40" r="2.5"/></g>
+</svg></div></div>
+  </div>
+  <p class="eyebrow">Bắt đầu từ nhu cầu của thầy cô</p>
+  <h2 class="h2-home">Chọn cách làm việc</h2>
+  <div class="modes-grid">
+    <button class="mode-card a" data-go="soan"><span class="mk">✦ Chế độ A</span><b>Tra cứu để soạn kế hoạch bài dạy</b><span>Chọn khối, chọn bài. Trang gom yêu cầu cần đạt, đánh dấu chỗ SGK không nêu so với chương trình, gợi ý năng lực số đúng bậc và dựng sẵn bảng mục tiêu có mã hóa theo Phụ lục IV.</span><em>Vào soạn KHBD →</em></button>
+    <button class="mode-card b" data-go="lib"><span class="mk">◇ Chế độ B</span><b>Thư viện tra cứu</b><span>Tra nguyên văn chương trình Ngữ văn lớp 6–12, phẩm chất và năng lực chung, khung năng lực số học sinh, tri thức tiếng Việt và tài liệu tích hợp, lọc theo lớp và từ khóa.</span><em>Mở thư viện →</em></button>
+  </div>
+  <div class="stats">
+    <div><b>${nY}</b><span>yêu cầu cần đạt, nguyên văn chương trình lớp 6–12</span></div>
+    <div><b>${D.bai.length}</b><span>bài học đã gắn với chương trình (lớp 6–12)</span></div>
+    <div><b>${D.nls.nang_luc.length}</b><span>năng lực số thành phần, ${nCB} chỉ báo theo bậc</span></div>
+    <div><b>100%</b><span>mục dữ liệu có ghi nguồn đến văn bản và trang</span></div>
+  </div>
+  <p class="eyebrow">Truy cập nhanh</p>
+  <h2 class="h2-home">Mở thẳng một bài</h2>
+  <div class="quick">${grades.map(l=>`<div class="qg" style="--h:${HUE[l]}"><div class="qg-h"><span class="qg-n">${l}</span><span><b>Ngữ văn ${l}</b><span class="src">${D.bai.filter(b=>b.lop===l).length} bài · ${D.bai.some(b=>b.lop===l&&+b.tap===2)?'tập một và tập hai':'tập một'}</span></span></div><div class="qg-list">${D.bai.filter(b=>b.lop===l).map(b=>`<button data-bai="${b.id}"><span class="n">${b.bai}</span>${esc(b.ten)}</button>`).join('')}</div></div>`).join('')}</div>
+  ${grades.some(l=>!D.bai.some(b=>b.lop===l&&+b.tap===2))?'<p class="src" style="margin-top:8px">Tập hai các khối còn lại đang được bổ sung.</p>':''}
+  <p class="eyebrow" style="margin-top:28px">Thư viện</p>
+  <div class="tiles">${LIB.map(([k,t],i)=>`<button data-lib="${k}"><span class="ti">${['☰','§','✿','⌘','⛨','❀','Aa','¶'][i]}</span><b>${t}</b><span class="src">${LIBD[k]}</span></button>`).join('')}</div>`;
+  const v=$('#v-home');
+  v.querySelectorAll('[data-go]').forEach(b=>b.onclick=()=>setMode(b.dataset.go));
+  v.querySelectorAll('[data-bai]').forEach(b=>b.onclick=()=>{const x=D.bai.find(y=>y.id===b.dataset.bai);st.lop=x.lop;renderGrades();setMode('soan');pick(x.id)});
+  v.querySelectorAll('[data-lib]').forEach(b=>b.onclick=()=>{lib=b.dataset.lib;store('lib',lib);setMode('lib')});
+}
+
+/* ---------- Soạn KHBD ---------- */
+function renderGrades(){
+  const g=$('#grades');g.innerHTML='';
+  [6,7,8,9,10,11,12].forEach(l=>{const b=document.createElement('button');b.textContent=l;b.setAttribute('aria-pressed',st.lop===l);
+    const has=D.bai.some(x=>x.lop===l);b.disabled=!has;b.title=has?'Lớp '+l:'Lớp '+l+': đang cập nhật';
+    b.onclick=()=>{st.lop=l;st.bai=null;renderGrades();renderLessons();renderContent()};g.appendChild(b)});
+}
+function renderLessons(){
+  const box=$('#lessons');box.innerHTML='';
+  let lastTap=null;D.bai.filter(b=>b.lop===st.lop).forEach(b=>{if(b.tap!==lastTap){lastTap=b.tap;const g=document.createElement('div');g.className='group-title';g.textContent='Tập '+(+b.tap===1?'một':'hai');box.appendChild(g)}const e=document.createElement('button');e.setAttribute('aria-pressed',st.bai===b.id);
+    e.innerHTML=`<span class="n">Bài ${b.bai}</span><span>${esc(b.ten)}</span>`;e.onclick=()=>pick(b.id);box.appendChild(e)});
+}
+const PHAN=[['doc','Đọc'],['tv','Thực hành tiếng Việt'],['viet','Viết'],['nn','Nói và nghe']];
+const MACH={doc:'Đọc',viet:'Viết',nn:'Nói và nghe'};
+function tvParts(b){const L=b.lop;const ttvL=(D.ttv.lop.find(x=>x.lop===L)||{chu_de:[]}).chu_de;
+  const hits=ttvL.filter(t=>(b.tv_ttv||[]).includes(t.ten));
+  const k=D.ct.find(x=>x.khoi==L)||{ktv:[]};const ids=[];
+  b.sgk_yccd_khac.forEach((t,i)=>{const id=b.id+'.SGKTV.'+i;CTM[id]={noi_dung:t,mach:'Tiếng Việt',sgk:1};ids.push(id)});
+  const ct=[];hits.forEach(h=>(h.lien_quan_ct||[]).forEach(lq=>{const j=(k.ktv||[]).findIndex(x=>x===lq||overlap(lq,x)>=0.8);const id=L+'.KTV.'+(j<0?lq.slice(0,20):j);if(!CTM[id])CTM[id]={noi_dung:j<0?lq:k.ktv[j],mach:'Kiến thức tiếng Việt',trang:''};if(!ct.includes(id))ct.push(id)}));
+  return {hits,sgk:ids,ct}}
+function partIds(b,ph){if(ph==='tv'){const t=tvParts(b);return {sgk:t.sgk,ct:t.ct}}
+  const f=id=>CTM[id]&&CTM[id].mach===MACH[ph];return {sgk:b.yccd_sgk_khop_ct.filter(f),ct:b.yccd_ct_sgk_khong_neu.filter(f)}}
+function setPhan(ph){st.phan=ph;st.vb=null;st.pg=0;const b=D.bai.find(x=>x.id===st.bai);st.sel=new Set(partIds(b,ph).sgk);st.nls=new Set();st.th=new Set();st.thText={};st.open='1';renderContent();window.scrollTo({top:0})}
+const atmFor=ma=>{const nl=ma.split('.').slice(0,2).join('.');return (D.atm?D.atm.nhom:[]).filter(g=>g.nl.includes(nl))};
+function nlsTxt(ma){let t='';D.nls.nang_luc.forEach(n=>Object.values(n.bac).forEach(bb=>bb.chi_bao.forEach(c=>{if(c.ma===ma)t=c.noi_dung})));return t}
+function atmGroups(){const m=new Map();[...st.nls].forEach(ma=>atmFor(ma).forEach(g=>m.set(g.ma,g)));return [...m.values()].sort((a,b)=>a.ma.localeCompare(b.ma))}
+function renderAtm(){const box=$('#atm-box');if(box){const sel=[...st.nls];
+  box.innerHTML=sel.length?`<div class="group-title">Biểu hiện theo bài của chỉ báo đã chọn</div>`+sel.map(ma=>`<div class="write"><label for="nb-${ma}"><span class="code">${ma}</span> ${esc(nlsTxt(ma))}</label><textarea id="nb-${ma}" data-nb="${ma}" placeholder="Biểu hiện cụ thể trong bài, GV tự viết">${esc(st.nlsText[ma]||'')}</textarea></div>`).join(''):'';
+  box.querySelectorAll('[data-nb]').forEach(e=>e.oninput=()=>{st.nlsText[e.dataset.nb]=e.value;updateObj()})}
+  const a=$('#atm-sec');if(a){const gs=atmGroups();
+  a.innerHTML=gs.length?`<div class="group-title">Nhóm an toàn mạng gợi ý</div>`+gs.map(g=>`<p class="src"><span class="tag atm">${g.ma}</span> <b>${esc(g.ten)}</b> · ví dụ: ${esc(g.vi_du)}</p>`).join(''):'<p class="src">Chọn chỉ báo năng lực số ở mục 5, trang sẽ gợi ý nhóm ATM tương ứng.</p>'}}
+function pick(id){
+  const b=D.bai.find(x=>x.id===id);st.bai=id;st.phan='doc';st.vb=null;st.pg=0;st.sel=new Set(partIds(b,'doc').sgk);st.nlc={};st.pc={};st.nls=new Set();st.nlsText={};st.atmText={};st.atm={hs:'',qd:'',ct:'',pc:''};st.th=new Set();st.thText={};st.open='1';
+  renderLessons();renderContent();window.scrollTo({top:0});
+}
+function sec(step,title,sub,inner){const last=step==='7';return `<details class="sec acc" data-acc="${step}" ${String(st.open)===step?'open':''}><summary><span class="step">${step}</span><span class="acc-t"><h3>${title}</h3>${sub?`<span class="src">${sub}</span>`:''}</span><span class="cnt" id="cnt-${step}"></span><span class="chev" aria-hidden="true"></span></summary><div class="acc-b">${inner}${last?'':`<div class="row nx"><button class="btn ghost" data-next="${+step+1}">Xong, sang mục ${+step+1} →</button></div>`}</div></details>`}
+
+function renderContent(){
+  const c=$('#content');
+  if(!st.bai){c.innerHTML=`<div class="sec hero-empty"><h2>Chọn một bài học để bắt đầu</h2><p class="lead" style="font-family:var(--f-disp);font-style:italic">Từ chương trình đến từng bài dạy, tra cứu trong một trang.</p><p class="lead">Chọn khối và bài ở cột bên. Trang sẽ gom yêu cầu cần đạt của chương trình, tri thức Ngữ văn và tiếng Việt, năng lực chung, phẩm chất, năng lực số và nội dung tích hợp của bài đó, rồi dựng sẵn bảng mục tiêu theo mẫu.</p></div>`;return}
+  const b=D.bai.find(x=>x.id===st.bai);const L=b.lop;
+  let h=`<div class="banner" style="--h:${HUE[L]||'#6a3fa0'}"><span class="eyebrow">Ngữ văn ${L} · tập ${b.tap === 1 || b.tap==='1' ? 'một':'hai'} · Bài ${b.bai}</span><h2>${esc(b.ten)}</h2><div class="phan" role="tablist" aria-label="Phần dạy">${PHAN.filter(([k])=>k!=='tv'||b.tv_toc).map(([k,t])=>`<button role="tab" data-phan="${k}" aria-selected="${st.phan===k}">${t}</button>`).join('')}</div>${st.phan==='doc'&&b.van_ban&&b.van_ban.length?`<div class="vbs"><p class="group-title">Văn bản đọc · chọn để mở đúng trang SGK</p><div class="dd"><button type="button" id="vb-btn" class="vb-sel" aria-haspopup="listbox" aria-expanded="false">${st.vb!=null?esc(b.van_ban[st.vb].ten):'Cả bài (trang mở đầu)'}</button><div class="dd-menu" id="vb-menu" role="listbox" hidden><button type="button" role="option" data-vbi="" aria-selected="${st.vb==null}">Cả bài (trang mở đầu)</button>${[['Văn bản đọc',false],['Thực hành đọc',true]].map(([g,th])=>{const it=b.van_ban.map((v,i)=>[v,i]).filter(([v])=>!!v.thuc_hanh_doc===th);return it.length?`<p class="dd-g">${g}</p>`+it.map(([v,i])=>`<button type="button" role="option" data-vbi="${i}" aria-selected="${st.vb===i}">${esc(v.ten)}${v.tac_gia?`<span>${esc(v.tac_gia)}</span>`:''}</button>`).join(''):''}).join('')}</div></div></div>`:''}<p class="src">Mỗi phần là một kế hoạch bài dạy riêng. Mục tiêu bên dưới lọc theo phần đang chọn.</p><button class="ai-btn" id="ai-open"><span class="spark">✦</span>Bật trợ lý thông minh để cùng lên ý tưởng bài dạy</button></div>`;
+  const P=partIds(b,st.phan);
+
+  // 1. YCCĐ
+  const item=(id,flag)=>{const y=CTM[id];if(!y)return'';return `<label class="item"><input type="checkbox" data-y="${id}" ${st.sel.has(id)?'checked':''}><span><span>${esc(y.noi_dung)}</span><span class="meta">${y.sgk?'':`<span class="code">${/KTV/.test(id)?'CT':id}</span>`}<span class="tag">${y.mach}${y.loai_vb?' · '+loaiShort[y.loai_vb]:''}</span>${y.sgk?'<span class="tag ok">Yêu cầu SGK nêu</span>':flag==='sgk'?'<span class="tag ok">SGK có nêu</span>':'<span class="tag warn">SGK không nêu</span>'}${y.trang?`<span class="src">CT tr. ${y.trang}</span>`:''}</span></span></label>`};
+  let y1=P.sgk.map(i=>item(i,'sgk')).join('');
+  let y2=P.ct.map(i=>item(i,'ct')).join('');
+  let other='';
+  h+=sec('1','Năng lực đặc thù: yêu cầu cần đạt','Chương trình 2018 là gốc · tick để đưa vào mục tiêu',
+    st.phan==='tv'?`<div class="group-title">SGK nêu cho phần tiếng Việt</div>${y1||`<p class="src">Nội dung thực hành: ${esc(b.tv_toc)}.</p>`}${y2?`<div class="group-title">Kiến thức tiếng Việt trong chương trình lớp ${L}</div>${y2}`:''}`
+    :`<div class="group-title">SGK có nêu, khớp chương trình</div>${y1||'<p class="empty">Chưa khớp được.</p>'}
+     <div class="group-title">Chương trình có cho ${st.phan==='doc'?'thể loại':'mạch'} này, SGK không nêu</div><p class="src">GV cân nhắc bổ sung theo mục tiêu của bài.</p>${y2||'<p class="empty">Không có.</p>'}`);
+
+  // 2. Tri thức
+  if(st.phan==='doc'){
+    h+=sec('2','Tri thức Ngữ văn','Tóm lược đề mục, xem nội dung đầy đủ trong SGK',
+    `${b.tri_thuc_ngu_van.length?`<ul class="plain">${b.tri_thuc_ngu_van.map(t=>`<li>${esc(t)}</li>`).join('')}</ul>`:'<p class="empty">Đang cập nhật.</p>'}<p class="src">Nguồn: SGK Ngữ văn ${L}, tập ${b.tap}, trang mở đầu bài (trang ${b.trang_pdf} bản PDF).</p>`);
+  }else if(st.phan==='tv'){
+    const tvHits=tvParts(b).hits;
+    h+=sec('2','Tri thức tiếng Việt','SGK: '+esc(b.tv_toc),
+    tvHits.length?tvHits.map(t=>`<details><summary>${esc(t.ten)}</summary><ul class="plain">${t.noi_dung.slice(0,8).map(p=>`<li>${esc(p)}</li>`).join('')}${t.noi_dung.length>8?'<li class="src">… xem đủ trong Thư viện</li>':''}</ul></details>`).join(''):`<p class="src">Tổng hợp tri thức tiếng Việt lớp ${L} không có mục riêng cho nội dung này; xem phần Thực hành tiếng Việt trong SGK.</p>`);
+  }else{
+    h+=sec('2','Tri thức về kiểu bài','',`<p class="src">Phần ${st.phan==='viet'?'Viết':'Nói và nghe'} dùng định hướng và quy trình trong SGK của bài; xem trang sách bên cạnh.</p>`);
+  }
+
+  // 3. NL chung
+  const nlc=D.pcnl.nang_luc_chung.danh_sach;
+  h+=sec('3','Năng lực chung','Ghi dạng "Tên: biểu hiện cụ thể theo bài". Biểu hiện gốc chỉ để tham khảo, GV tự viết.',
+    nlc.map((n,i)=>`<details><summary>${esc(n.ten)}</summary>${n.thanh_phan.map((t,j)=>`<div class="group-title">${esc(t.ten)}</div><ul class="plain">${t[cap(L)].map(x=>`<li>${esc(x)}</li>`).join('')}</ul>`).join('')}
+      <div class="write"><label for="nlc-${i}">${esc(n.ten)}: biểu hiện trong bài này</label><textarea id="nlc-${i}" data-nlc="${i}" placeholder="GV tự viết, ví dụ: hợp tác nhóm hoàn thành phiếu học tập…">${esc(st.nlc[i]||'')}</textarea></div></details>`).join(''));
+
+  // 4. Phẩm chất
+  const pc=D.pcnl.pham_chat_chu_yeu.danh_sach;
+  h+=sec('4','Phẩm chất','Theo CT tổng thể, diễn giải riêng cho bài',
+    (b.sgk_pham_chat.length?`<div class="note"><b>SGK gợi ý:</b> ${esc(b.sgk_pham_chat[0])}</div>`:'')+
+    pc.map((p,i)=>`<details><summary>${esc(p.ten)}</summary>${p.bieu_hien.map(x=>`${x.ten?`<div class="group-title">${esc(x.ten)}</div>`:''}<ul class="plain">${(x[cap(L)]||[]).map(t=>`<li>${esc(t)}</li>`).join('')}</ul>`).join('')}
+      <div class="write"><label for="pc-${i}">${esc(p.ten)}: biểu hiện trong bài này</label><textarea id="pc-${i}" data-pc="${i}" placeholder="GV tự viết">${esc(st.pc[i]||'')}</textarea></div></details>`).join(''));
+
+  // 5. NLS
+  const B=bac(L);
+  h+=sec('5','Năng lực số (TT 02/2025, mã CV 3456)',`Lớp ${L} dùng bậc <b>${B}</b> · chọn 1–3 năng lực thành phần có hoạt động và minh chứng thật trong bài`,
+        D.nls.mien.map((m,mi)=>{const nl=D.nls.nang_luc.filter(n=>n.mien===m.ten);return `<details><summary>Miền ${mi+1}. ${esc(m.ten)}</summary>${nl.map(n=>`<div class="group-title">${n.ma} ${esc(n.ten)}</div>${(n.bac[B]?.chi_bao||[]).map(cb=>`<label class="item"><input type="checkbox" data-nls="${cb.ma}" ${st.nls.has(cb.ma)?'checked':''}><span>${esc(cb.noi_dung)}<span class="meta"><span class="code">${cb.ma}</span></span></span></label>`).join('')}`).join('')}</details>`}).join('')+
+    `<p class="src" id="nls-count"></p><div id="atm-box"></div>`);
+
+  // 6. ATM
+  h+=sec('6','Mục tiêu tích hợp an toàn mạng','Cấu trúc 3 thành phần · nhóm ATM gợi ý theo chỉ báo năng lực số đã chọn',`<div id="atm-sec"></div>
+    <p class="src">Động từ nên dùng: ${L<=9?'thực hiện, giải thích, tổ chức, thảo luận, đối chiếu, chỉ ra, phân biệt (THCS)':'áp dụng, đánh giá, kiểm chứng, tự đề xuất, lập luận, hướng dẫn người khác (THPT)'}. Tránh: biết, hiểu, nêu được, có ý thức. Yêu cầu ATM là hành vi quan sát được để lấy minh chứng.</p>
+    <div class="write"><label for="atm-hs">Học sinh … (yêu cầu cần đạt của TT 02)</label><textarea id="atm-hs" data-atmf="hs" placeholder="Ví dụ: tổ chức được việc tìm kiếm và đánh giá độ tin cậy của thông tin trên môi trường số">${esc(st.atm.hs)}</textarea></div>
+    <div class="write"><label for="atm-qd">qua đó … (yêu cầu cần đạt môn Ngữ văn)</label><textarea id="atm-qd" data-atmf="qd" placeholder="Ví dụ: viết được văn bản … có lí do và bằng chứng xác thực">${esc(st.atm.qd)}</textarea></div>
+    <div class="write"><label for="atm-ct">cụ thể là … (yêu cầu an toàn mạng quan sát được)</label><textarea id="atm-ct" data-atmf="ct" placeholder="Ví dụ: đề xuất được ít nhất 03 quy tắc nhóm chat lớp về ngôn ngữ, hình ảnh và thông tin cá nhân">${esc(st.atm.ct)}</textarea></div>
+    <div class="write"><label for="atm-pc">Phẩm chất gắn với an toàn mạng (nếu có, ghi "Tên: biểu hiện")</label><textarea id="atm-pc" data-atmf="pc" placeholder="Ví dụ: Trách nhiệm công dân số: không chia sẻ hình ảnh, thông tin của người khác khi chưa được đồng ý">${esc(st.atm.pc)}</textarea></div>`);
+
+  // 7. Tích hợp
+  if(L>=10){
+    const g=D.tichhop.goi_y_ngu_van.filter(x=>x.lop===L);
+    const hits=[];g.forEach(x=>{const ids=x.dia_chi_tich_hop.map(d=>d.id_ct).filter(Boolean);const hit=ids.filter(i=>st.sel.has(i));if(hit.length)x.noi_dung_tich_hop.forEach(n=>hits.push({n,hit,mach:x.mach}))});
+    h+=sec('7','Tích hợp giáo dục lý tưởng cách mạng, đạo đức, lối sống','Tài liệu Bộ GDĐT 2025 · gợi ý theo YCCĐ đã chọn',
+      hits.length?hits.map((x,k)=>{const key=x.n.ma+'|'+x.mach;return `<label class="item"><input type="checkbox" data-th="${esc(key)}" data-text="${esc(x.n.ten+': '+x.n.bieu_hien)}" ${st.th.has(key)?'checked':''}><span><b>${x.n.ma}. ${esc(x.n.ten)}</b>: ${esc(x.n.bieu_hien)}<span class="meta"><span class="tag">${x.mach}</span><span class="src">vì đã chọn ${x.hit.map(i=>`<span class="code">${i}</span>`).join(' ')}</span></span></span></label>`}).join('')+`<p class="src">Thường ghi thành dòng "Nội dung tích hợp: …" sau phẩm chất, hoặc thể hiện trong tổ chức hoạt động.</p>`
+      :'<p class="empty">Các YCCĐ đang chọn chưa trùng địa chỉ tích hợp nào trong tài liệu.</p>');
+  }else{
+    h+=sec('7','Tích hợp','', '<p class="empty">Tài liệu tích hợp cấp THCS chưa có.</p>');
+  }
+
+  // 7. Bảng mục tiêu
+  const vbo=st.phan==='doc'&&st.vb!=null?b.van_ban[st.vb]:null;
+  const modal=`<button class="fab" id="obj-open"><span class="fab-i">▦</span><span><b>Mục tiêu bài học</b><span id="fab-n"></span></span></button>
+  <div class="ov" id="ai-ov" hidden><div class="modal ai-modal" role="dialog" aria-modal="true" aria-labelledby="ai-h"><div class="row" style="justify-content:space-between;align-items:flex-start"><div><p class="eyebrow">Trợ lý thông minh</p><h2 id="ai-h">Cùng lên ý tưởng bài dạy</h2></div><button class="x" id="ai-close" aria-label="Đóng">×</button></div><p class="lead">Trợ lý sẽ dựa trên bài, phần dạy và các mục tiêu thầy cô đã chọn để gợi ý ý tưởng hoạt động. Thầy cô là người quyết định và viết kế hoạch bài dạy.</p><ul class="plain"><li>Dùng khóa API của chính thầy cô, chỉ lưu trên trình duyệt của máy đang dùng, xóa được bất cứ lúc nào.</li><li>Chỉ gửi nội dung bài học, không gửi tên hay thông tin cá nhân.</li><li>Chỉ bật khi thầy cô cần, phần tra cứu luôn dùng được mà không cần trợ lý.</li></ul><div class="soon">Tính năng đang được hoàn thiện.</div></div></div>
+  <div class="ov" id="obj-ov" hidden><div class="modal" role="dialog" aria-modal="true" aria-labelledby="obj-h"><div class="row" style="justify-content:space-between;align-items:flex-start"><div><p class="eyebrow">${esc(PHAN.find(x=>x[0]===st.phan)[1])} · ${vbo?esc(vbo.ten):'Bài '+b.bai+'. '+esc(b.ten)}</p><h2 id="obj-h">Mục tiêu bài học</h2><p class="src">Tổng hợp từ các lựa chọn của thầy cô, dạng liệt kê để sao chép về chỉnh sửa.</p></div><button class="x" id="obj-close" aria-label="Đóng">×</button></div><div class="table-wrap" id="obj"></div><div class="row"><button class="btn" id="copy">Sao chép mục tiêu</button></div></div></div>`;
+  const pages=vbo&&vbo.trang_pdf?[0,1,2,3].map(k=>vbo.trang_pdf+k):[0,1,2,3,4,5].map(k=>b.trang_pdf+k);
+  const vw=`<aside class="viewer" aria-label="Trang SGK"><div class="row" style="justify-content:space-between"><h3>Trang SGK của bài</h3><span class="src" id="pg-lbl"></span></div><div class="pgwrap"><div class="pg"><img id="pg-img" alt="Trang SGK" ${b.spr?'':`src="sgk/${L}-${b.tap}-${String(pages[0]).padStart(3,'0')}.jpg"`}></div><button class="flip l" id="pg-prev" aria-label="Trang trước">‹</button><button class="flip r" id="pg-next" aria-label="Trang sau">›</button></div><p class="src">Ngữ văn ${L}, tập ${b.tap}. Bấm mũi tên hoặc phím ← → để lật trang, bấm vào trang để phóng to.</p></aside>`;
+  c.innerHTML=`<div class="lesson"><div class="secs">${h}</div>${vw}</div>${modal}`;
+  const aov=$('#ai-ov');$('#ai-open').onclick=()=>{aov.hidden=false;$('#ai-close').focus()};$('#ai-close').onclick=()=>aov.hidden=true;aov.onclick=e=>{if(e.target===aov)aov.hidden=true};
+  const ov=$('#obj-ov');$('#obj-open').onclick=()=>{ov.hidden=false;$('#obj-close').focus()};$('#obj-close').onclick=()=>ov.hidden=true;ov.onclick=e=>{if(e.target===ov)ov.hidden=true};
+  let cur=0;const show=i=>{cur=Math.max(0,Math.min(pages.length-1,i));setPg($('#pg-img'),b,L,pages[cur]);$('#pg-lbl').textContent=`${cur+1} / ${pages.length}`;$('#pg-prev').disabled=cur===0;$('#pg-next').disabled=cur===pages.length-1;c.querySelectorAll('[data-pg]').forEach(x=>x.setAttribute('aria-pressed',+x.dataset.pg===cur));$('#content .pg').scrollTop=0};
+  c.querySelectorAll('[data-pg]').forEach(x=>x.onclick=()=>show(+x.dataset.pg));$('#pg-prev').onclick=()=>show(cur-1);$('#pg-next').onclick=()=>show(cur+1);show(st.pg&&st.pgBai===b.id?st.pg:0);
+  window.__flip=d=>show(cur+d);
+  c.querySelector('.pg').addEventListener('click',e=>{if(e.target.tagName==='IMG')e.currentTarget.classList.toggle('zoom')});
+  const origShow=show;window.__pg=i=>{st.pg=i;st.pgBai=b.id;origShow(i)};c.querySelectorAll('[data-pg]').forEach(x=>x.addEventListener('click',()=>{st.pg=+x.dataset.pg;st.pgBai=b.id}));
+  bindContent();renderAtm();updateObj();
+}
+const SPR={};
+function setPg(img,b,L,p){const e=b.spr&&b.spr.p.find(x=>x[0]===p);if(!e){img.src=`sgk/${L}-${b.tap}-${String(p).padStart(3,'0')}.jpg`;return}
+  img.dataset.want=b.spr.f+'#'+p;
+  const draw=im=>{if(img.dataset.want!==b.spr.f+'#'+p)return;const cv=document.createElement('canvas');cv.width=e[2];cv.height=e[3];cv.getContext('2d').drawImage(im,0,e[1],e[2],e[3],0,0,e[2],e[3]);img.src=cv.toDataURL('image/jpeg',.92)};
+  let s=SPR[b.spr.f];if(!s){const im=new Image();s=SPR[b.spr.f]={im,ok:false,q:[]};im.onload=()=>{s.ok=true;s.q.splice(0).forEach(f=>f(im))};im.src=b.spr.f}
+  if(s.ok)draw(s.im);else{img.removeAttribute('src');s.q.push(draw)}}
+function bindContent(){
+  const c=$('#content');
+  c.querySelectorAll('[data-y]').forEach(e=>e.onchange=()=>{e.checked?st.sel.add(e.dataset.y):st.sel.delete(e.dataset.y);const open=[...c.querySelectorAll('details:not(.acc)')].map(d=>d.open);renderContent();[...$('#content').querySelectorAll('details:not(.acc)')].forEach((d,i)=>d.open=open[i]||false)});
+  c.querySelectorAll('[data-phan]').forEach(x=>x.onclick=()=>setPhan(x.dataset.phan));
+  const vbb=$('#vb-btn'),vbm=$('#vb-menu');if(vbb){vbb.onclick=e=>{e.stopPropagation();vbm.hidden=!vbm.hidden;vbb.setAttribute('aria-expanded',!vbm.hidden)};vbm.querySelectorAll('[data-vbi]').forEach(x=>x.onclick=()=>{st.vb=x.dataset.vbi===''?null:+x.dataset.vbi;st.pg=0;st.pgBai=null;renderContent()})}
+  c.querySelectorAll('details.acc').forEach(d=>d.addEventListener('toggle',()=>{if(d.open){st.open=d.dataset.acc;c.querySelectorAll('details.acc').forEach(o=>{if(o!==d)o.open=false})}}));
+  c.querySelectorAll('[data-next]').forEach(b=>b.onclick=()=>{const d=c.querySelector(`details.acc[data-acc="${b.dataset.next}"]`);if(d){d.open=true;setTimeout(()=>d.scrollIntoView({behavior:'smooth',block:'start'}),30)}});
+  c.querySelectorAll('[data-atmf]').forEach(e=>e.oninput=()=>{st.atm[e.dataset.atmf]=e.value;updateObj()});
+  c.querySelectorAll('[data-nlc]').forEach(e=>e.oninput=()=>{st.nlc[e.dataset.nlc]=e.value;updateObj()});
+  c.querySelectorAll('[data-pc]').forEach(e=>e.oninput=()=>{st.pc[e.dataset.pc]=e.value;updateObj()});
+  c.querySelectorAll('[data-nls]').forEach(e=>e.onchange=()=>{if(e.checked){const nl=x=>x.split('.').slice(0,2).join('.');const ds=new Set([...st.nls].map(nl));if(!ds.has(nl(e.dataset.nls))&&ds.size>=3){e.checked=false;toast('Mỗi bài chọn tối đa 3 năng lực thành phần');return}st.nls.add(e.dataset.nls)}else st.nls.delete(e.dataset.nls);renderAtm();updateObj()});
+  c.querySelectorAll('[data-th]').forEach(e=>e.onchange=()=>{e.checked?(st.th.add(e.dataset.th),st.thText[e.dataset.th]=e.dataset.text):st.th.delete(e.dataset.th);updateObj()});
+  const cp=$('#copy');if(cp)cp.onclick=()=>{const t=objText();(navigator.clipboard?navigator.clipboard.writeText(t):Promise.reject()).then(()=>toast('Đã sao chép mục tiêu')).catch(()=>{const r=document.createRange();r.selectNodeContents($('#obj'));const s=getSelection();s.removeAllRanges();s.addRange(r);toast('Đã chọn nội dung, nhấn Ctrl+C để sao chép')})};
+}
+function objRows(){
+  const b=D.bai.find(x=>x.id===st.bai);const L=b.lop;const rows=[];const T=x=>(x||'').trim();
+  rows.push({h:'1. Năng lực'});
+  rows.push({h2:'a) Năng lực đặc thù'});let n1=0;
+  [...st.sel].forEach(id=>{const y=CTM[id];if(y){rows.push({t:y.noi_dung.replace(/\.\s*$/,'')+(n1===0?` (Yêu cầu cần đạt, Chương trình Ngữ văn 2018, lớp ${L}).`:'.')});n1++}});
+  if(!n1)rows.push({t:'(chưa chọn yêu cầu cần đạt)',e:1});
+  rows.push({h2:'b) Năng lực chung'});let n2=0;
+  D.pcnl.nang_luc_chung.danh_sach.forEach((n,i)=>{const t=T(st.nlc[i]);if(t){rows.push({t:n.ten+': '+t});n2++}});
+  if(!n2)rows.push({t:'(chưa ghi năng lực chung)',e:1});
+  const nlsSel=[...st.nls];
+  if(nlsSel.length){rows.push({h2:`c) Năng lực số (bậc ${bac(L)} – Phụ lục 2, Công văn 3456/BGDĐT-GDPT)`});
+    nlsSel.forEach(ma=>{const bh=T(st.nlsText[ma]);rows.push({t:ma+' – '+nlsTxt(ma).replace(/\.\s*$/,'')+(bh?': '+bh:'.')})})}
+  const A=st.atm,gs=atmGroups().map(g=>g.ma);
+  if(T(A.hs)||T(A.qd)||T(A.ct)){rows.push({h2:(nlsSel.length?'d)':'c)')+' Mục tiêu tích hợp an toàn mạng (cấu trúc 3 thành phần)'});
+    rows.push({p:'Học sinh '+T(A.hs)+' (YCCĐ của TT 02'+(nlsSel.length?' – '+nlsSel.join('; '):'')+'); qua đó '+T(A.qd)+' (YCCĐ môn Ngữ văn); cụ thể là '+T(A.ct)+' (yêu cầu ATM'+(gs.length?' – nhóm '+gs.join(', '):'')+').'})}
+  rows.push({h:'2. Phẩm chất'});let p=0;
+  D.pcnl.pham_chat_chu_yeu.danh_sach.forEach((x,i)=>{const t=T(st.pc[i]);if(t){rows.push({t:x.ten+': '+t});p++}});
+  if(T(A.pc)){rows.push({t:T(A.pc)});p++}
+  if(!p)rows.push({t:'(chưa ghi phẩm chất)',e:1});
+  if(st.th.size)rows.push({t:'Nội dung tích hợp: '+[...st.th].map(x=>st.thText[x]).join('; ')});
+  return rows;
+}
+function updateObj(){
+  const o=$('#obj');if(!o)return;
+  const rows=objRows();
+  o.innerHTML=`<div class="objlist">${rows.map(r=>r.h?`<p class="oh">${r.h}</p>`:r.h2?`<p class="oh2">${esc(r.h2)}</p>`:r.p?`<p class="op">${esc(r.p)}</p>`:`<p class="oi${r.e?' empty':''}">${r.e?'':'- '}${esc(r.t)}</p>`).join('')}</div>`;
+  const cn=(k,t)=>{const e=$('#cnt-'+k);if(e){e.textContent=t;e.classList.toggle('on',!!t)}};const f=o=>Object.values(o).filter(v=>(v||'').trim()).length;
+  cn('1',st.sel.size?`Đã chọn ${st.sel.size}`:'');cn('3',f(st.nlc)?`Đã ghi ${f(st.nlc)}`:'');cn('4',f(st.pc)?`Đã ghi ${f(st.pc)}`:'');cn('5',st.nls.size?`${st.nls.size}/3 chỉ báo`:'');cn('7',st.th.size?`Đã chọn ${st.th.size}`:'');cn('6',[st.atm.hs,st.atm.qd,st.atm.ct].filter(x=>x.trim()).length?`Đã ghi ${[st.atm.hs,st.atm.qd,st.atm.ct].filter(x=>x.trim()).length}/3`:(atmGroups().length?atmGroups().map(g=>g.ma).join(', '):''));
+  const fn=$('#fab-n');if(fn){const n=rows.filter(r=>(r.t||r.p)&&!r.e).length;fn.textContent=n?`${n} mục đã chọn`:'chưa chọn mục nào'}
+  const nc=$('#nls-count');if(nc)nc.textContent=`Đã chọn ${st.nls.size} chỉ báo, thuộc ${new Set([...st.nls].map(x=>x.split('.').slice(0,2).join('.'))).size}/3 năng lực thành phần. Mỗi hoạt động nên gắn 1–2 chỉ báo.`;
+}
+function objText(){return objRows().filter(r=>!r.e).map(r=>r.h?r.h:r.h2?r.h2:r.p?r.p:'- '+r.t).join('\n')}
+
+/* ---------- Thư viện ---------- */
+const LIBD={bai:'Theo khối, tập một và tập hai',ct:'Yêu cầu cần đạt lớp 6–12, chuyên đề 10–12',pcnl:'CT tổng thể, mục IX',nls:'TT 02/2025, mã CV 3456',atm:'ATM1–ATM8 và mã năng lực số tương ứng',th:'Lý tưởng cách mạng, đạo đức, lối sống',ttv:'Theo SGK lớp 6–12',vb:'Danh mục nguồn'};
+const LIB=[['bai','Danh mục bài học'],['ct','Chương trình Ngữ văn'],['pcnl','Phẩm chất, năng lực chung'],['nls','Năng lực số học sinh'],['atm','An toàn mạng (ATM)'],['th','Tích hợp (THPT)'],['ttv','Tri thức tiếng Việt'],['vb','Văn bản căn cứ']];
+let lib=load('lib')||'bai';const lf={lop:'10',mach:'',q:''};
+function accL(t,sub,n,inner,open){return `<details class="sec acc" ${open?'open':''}><summary><span class="acc-t"><h3>${t}</h3>${sub?`<span class="src">${sub}</span>`:''}</span>${n!=null?`<span class="cnt on">${n}</span>`:''}<span class="chev" aria-hidden="true"></span></summary><div class="acc-b">${inner}</div></details>`}
+function renderLib(){
+  const n=$('#libnav');n.innerHTML='';
+  LIB.forEach(([k,t])=>{const b=document.createElement('button');b.textContent=t;b.setAttribute('aria-pressed',lib===k);b.onclick=()=>{lib=k;store('lib',k);renderLib()};n.appendChild(b)});
+  const c=$('#libcontent');
+  const hl=(t,q)=>{t=esc(t);if(!q)return t;const i=t.toLowerCase().indexOf(q.toLowerCase());return i<0?t:t.slice(0,i)+'<mark>'+t.slice(i,i+q.length)+'</mark>'+t.slice(i+q.length)};
+  const filt=(on)=>`<div class="filters"><select id="f-lop" aria-label="Lớp">${[6,7,8,9,10,11,12].map(l=>`<option ${lf.lop==l?'selected':''}>${l}</option>`).join('')}</select>${on.mach?`<select id="f-mach" aria-label="Mạch"><option value="">Tất cả mạch</option>${['Đọc','Viết','Nói và nghe'].map(m=>`<option ${lf.mach===m?'selected':''}>${m}</option>`).join('')}</select>`:''}<input class="search" id="f-q" placeholder="Tìm trong nội dung…" value="${esc(lf.q)}"></div>`;
+  if(lib==='bai'){
+    const T=['một','hai'];
+    c.innerHTML=`<div><h2>Danh mục bài học</h2><p class="lead">SGK Ngữ văn thống nhất, theo khối và tập. Bấm tên bài để mở trang soạn KHBD của bài.</p></div><div class="secs">${[6,7,8,9,10,11,12].map(l=>{const bs=D.bai.filter(b=>b.lop===l);return accL(`Ngữ văn ${l}`,bs.length?`${bs.length} bài`:'Đang trích từ SGK',bs.length||null,bs.length?`<div class="tap2">${[1,2].map(t=>`<div><div class="group-title">Tập ${T[t-1]}</div><div class="qg-list" style="--h:${HUE[l]}">${bs.filter(b=>+b.tap===t).map(b=>`<button data-open="${b.id}"><span class="n">${b.bai}</span>${esc(b.ten)}</button>`).join('')}</div></div>`).join('')}</div>`:'<p class="empty">Chưa có dữ liệu bài học lớp này.</p>',false)}).join('')}</div>`;
+    c.querySelectorAll('[data-open]').forEach(b=>b.onclick=()=>{const x=D.bai.find(y=>y.id===b.dataset.open);st.lop=x.lop;renderGrades();setMode('soan');pick(x.id)});
+  }else if(lib==='ct'){
+    const k=D.ct.find(x=>x.khoi==lf.lop);
+    const ys=k.yccd.filter(y=>(!lf.mach||y.mach===lf.mach)&&(!lf.q||y.noi_dung.toLowerCase().includes(lf.q.toLowerCase())));
+    const card=y=>`<div class="yc"><div>${hl(y.noi_dung,lf.q)}</div><div class="meta row"><span class="code">${y.id}</span>${y.the_loai&&y.the_loai[0]!=='*'?`<span class="tag ok">${y.the_loai.join(', ')}</span>`:''}<span class="src">CT tr. ${y.trang}</span></div></div>`;
+    const groups=[];
+    const byNhom=arr=>{const m=new Map();arr.forEach(y=>{const k=y.nhom||'';if(!m.has(k))m.set(k,[]);m.get(k).push(y)});return [...m].map(([k,v])=>`${k?`<div class="group-title">${esc(k)}</div>`:''}<div class="cards">${v.map(card).join('')}</div>`).join('')};
+    const doc=ys.filter(y=>y.mach==='Đọc');const loais=[...new Set(doc.map(y=>y.loai_vb))];
+    loais.forEach(l=>{const a=doc.filter(y=>y.loai_vb===l);groups.push(['Đọc · '+esc(l),'Hình thức gắn theo thể loại, nội dung dùng chung',a.length,byNhom(a)])});
+    ['Viết','Nói và nghe'].forEach(m=>{const a=ys.filter(y=>y.mach===m);if(a.length)groups.push([m,'',a.length,byNhom(a)])});
+    const rest=ys.filter(y=>!['Đọc','Viết','Nói và nghe'].includes(y.mach));if(rest.length)groups.push(['Khác','',rest.length,byNhom(rest)]);
+    const cds=(k.chuyen_de||[]).filter(cd=>!lf.q||(cd.ten+' '+(cd.yccd||[]).join(' ')).toLowerCase().includes(lf.q.toLowerCase()));
+    if(cds.length&&!lf.mach)groups.push(['Chuyên đề học tập lớp '+lf.lop,'',cds.length,cds.map(cd=>`<div class="yc"><b>${cd.ma}. ${esc(cd.ten)}</b><ul class="plain">${(cd.yccd||[]).map(t=>`<li>${hl(t,lf.q)}</li>`).join('')}</ul><span class="src">CT tr. ${cd.trang}</span></div>`).join('')]);
+    c.innerHTML=`<div><h2>Yêu cầu cần đạt, lớp ${lf.lop}</h2><p class="lead">Chương trình GDPT môn Ngữ văn 2018, nguyên văn. ${ys.length} mục, chia theo mạch và loại văn bản.</p></div>${filt({mach:1})}<div class="secs">${groups.map((g,i)=>accL(g[0],g[1],g[2],g[3],!!lf.q)).join('')||'<p class="empty">Không có mục phù hợp.</p>'}</div>`;
+  }else if(lib==='pcnl'){
+    const P=D.pcnl;
+    c.innerHTML=`<div><h2>Phẩm chất chủ yếu và năng lực chung</h2><p class="lead">CT tổng thể, mục IX, nguyên văn. Cột THCS và THPT.</p></div>
+     <div class="secs">${accL('Phẩm chất chủ yếu','CT tổng thể, mục IX.1',P.pham_chat_chu_yeu.danh_sach.length,`${P.pham_chat_chu_yeu.danh_sach.map(p=>`<details><summary>${esc(p.ten)}</summary>${p.bieu_hien.map(x=>`${x.ten?`<div class="group-title">${esc(x.ten)}</div>`:''}<b class="src">THCS</b><ul class="plain">${x.thcs.map(t=>`<li>${esc(t)}</li>`).join('')}</ul><b class="src">THPT</b><ul class="plain">${x.thpt.map(t=>`<li>${esc(t)}</li>`).join('')}</ul>`).join('')}</details>`).join('')}`)}
+     ${accL('Năng lực chung','CT tổng thể, mục IX.2',P.nang_luc_chung.danh_sach.length,`${P.nang_luc_chung.danh_sach.map(n=>`<details><summary>${esc(n.ten)}</summary>${n.thanh_phan.map(t=>`<div class="group-title">${esc(t.ten)}</div><b class="src">THCS</b><ul class="plain">${t.thcs.map(x=>`<li>${esc(x)}</li>`).join('')}</ul><b class="src">THPT</b><ul class="plain">${t.thpt.map(x=>`<li>${esc(x)}</li>`).join('')}</ul>`).join('')}</details>`).join('')}`)}</div>
+     <p class="src">Năng lực đặc thù: ${P.nang_luc_dac_thu.danh_sach.join(', ')}. ${esc(P.nang_luc_dac_thu.ghi_chu)}</p>`;
+  }else if(lib==='nls'){
+    const B=bac(+lf.lop);
+    c.innerHTML=`<div><h2>Năng lực số của học sinh</h2><p class="lead">TT 02/2025/TT-BGDĐT, mã chỉ báo theo CV 3456. Lớp ${lf.lop} dùng bậc ${B}.</p></div>${filt({})}`+
+    '<div class="secs">'+D.nls.mien.map((m,mi)=>{const nls=D.nls.nang_luc.filter(n=>n.mien===m.ten);return accL(`Miền ${mi+1}. ${esc(m.ten)}`,'',nls.length+' năng lực',nls.map(n=>{const cbs=(n.bac[B]?.chi_bao||[]).filter(cb=>!lf.q||cb.noi_dung.toLowerCase().includes(lf.q.toLowerCase())||n.ten.toLowerCase().includes(lf.q.toLowerCase()));return cbs.length?`<details ${lf.q?'open':''}><summary>${n.ma} ${esc(n.ten)}</summary><p class="src">${esc(n.mo_ta)}</p><ul class="plain">${cbs.map(cb=>`<li><span class="code">${cb.ma}</span> ${hl(cb.noi_dung,lf.q)}</li>`).join('')}</ul></details>`:''}).join(''),!!lf.q)}).join('')+'</div>';
+  }else if(lib==='atm'){
+    const A=D.atm;
+    c.innerHTML=`<div><h2>An toàn mạng: tám nhóm nội dung cốt lõi</h2><p class="lead">${esc(A.nguon)}</p></div><div class="atm-grid">${A.nhom.map(g=>`<div class="yc"><div class="row"><span class="tag atm">${g.ma}</span><span class="src">Mã NL: ${g.nl.join('; ')}</span></div><b>${esc(g.ten)}</b><span class="src">${esc(g.vi_du)}</span><div class="row">${g.nl.map(n=>{const x=D.nls.nang_luc.find(y=>y.ma===n);return `<span class="tag" title="${x?esc(x.ten):''}">${n}${x?' '+esc(x.ten):''}</span>`}).join('')}</div></div>`).join('')}</div><p class="src">Cách ghi trong kế hoạch bài dạy: mã nhóm ATM đặt trong ngoặc cuối dòng năng lực số, kèm yêu cầu an toàn mạng quan sát được trong bài.</p>`;
+  }else if(lib==='th'){
+    const T=D.tichhop;
+    c.innerHTML=`<div><h2>Tích hợp giáo dục lý tưởng cách mạng, đạo đức, lối sống</h2><p class="lead">${esc(T.nguon)}</p></div>
+    <div class="secs">${accL('Khung nội dung cốt lõi','3 nhóm, 9 nội dung',null,`${T.khung_noi_dung_cot_loi.map(g=>`<details><summary>${g.ma}. ${esc(g.ten)}</summary>${g.noi_dung.map(n=>`<div class="group-title">${n.ma}. ${esc(n.ten)}</div><ul class="plain">${n.yccd.map(x=>`<li>${esc(x)}</li>`).join('')}</ul>`).join('')}</details>`).join('')}`)}
+    ${[10,11,12].map(l=>accL(`Gợi ý cho Ngữ văn ${l}`,'Địa chỉ tích hợp theo YCCĐ',null,`${T.goi_y_ngu_van.filter(x=>x.lop===l).map(x=>`<div class="group-title">${x.mach}</div><p class="src">Địa chỉ tích hợp: ${x.dia_chi_tich_hop.map(d=>`<span class="code">${d.id_ct||'?'}</span>`).join(' ')}</p><ul class="plain">${x.noi_dung_tich_hop.map(n=>`<li><b>${n.ma}</b> ${esc(n.bieu_hien)}</li>`).join('')}</ul>`).join('')}`)).join('')}</div>`;
+  }else if(lib==='ttv'){
+    const Lx=D.ttv.lop.find(x=>x.lop==lf.lop)||{chu_de:[]};
+    const q=lf.q.toLowerCase();
+    const items=Lx.chu_de.filter(t=>!q||t.ten.toLowerCase().includes(q)||t.noi_dung.join(' ').toLowerCase().includes(q));
+    c.innerHTML=`<div><h2>Tri thức tiếng Việt, lớp ${lf.lop}</h2><p class="lead">${esc(D.ttv.nguon)}</p></div>${filt({})}${items.map(t=>`<details ${q?'open':''}><summary>${t.ma}. ${esc(t.ten)}</summary>${t.lien_quan_ct?`<p class="src">Chương trình: ${t.lien_quan_ct.map(esc).join(' · ')}</p>`:''}${t.ghi_chu?`<p class="src">${esc(t.ghi_chu)}</p>`:''}<ul class="plain">${t.noi_dung.map(p=>`<li>${hl(p,lf.q)}</li>`).join('')}</ul>${(t.muc_con||[]).map(m=>`<div class="group-title">${m.ma}. ${esc(m.ten)}</div><ul class="plain">${m.noi_dung.map(p=>`<li>${hl(p,lf.q)}</li>`).join('')}</ul>`).join('')}</details>`).join('')||'<p class="empty">Không có mục phù hợp.</p>'}`;
+  }else{
+    c.innerHTML=`<div><h2>Văn bản căn cứ</h2><p class="lead">Mọi mục dữ liệu trên trang đều ghi nguồn đến văn bản và trang.</p></div><div class="cards">${[
+      ['Chương trình GDPT môn Ngữ văn 2018','Thông tư 32/2018/TT-BGDĐT. Gốc của yêu cầu cần đạt lớp 6–12 và chuyên đề 10–12.'],
+      ['Chương trình GDPT – Chương trình tổng thể','Mục IX: phẩm chất chủ yếu, năng lực chung (THCS, THPT).'],
+      ['Thông tư 02/2025/TT-BGDĐT','Khung năng lực số cho người học: 6 miền, 24 năng lực thành phần.'],
+      ['Công văn 3456/BGDĐT-GDPT (27/6/2025)','Bậc theo lớp (6–7 TC1, 8–9 TC2, 10–12 NC1) và mã chỉ báo [NL].[bậc][chữ cái].'],
+      ['Công văn 5512/BGDĐT-GDTrH (18/12/2020), Phụ lục IV','Khung kế hoạch bài dạy.'],
+      ['Công văn 6206/BGDĐT-GDPT, năm học 2026–2027','Tám nhóm nội dung cốt lõi về an toàn mạng ATM1–ATM8 và mã năng lực số tương ứng.'],
+      ['Tài liệu tập huấn Tích hợp năng lực số và an toàn mạng vào kế hoạch bài dạy môn Ngữ văn (Bộ GDĐT)','Cấu trúc mục tiêu tích hợp 3 thành phần, mỗi bài 1–3 năng lực thành phần, động từ mục tiêu theo cấp học, nhóm ATM ghi trong ngoặc cuối dòng.'],
+      ['Tài liệu tích hợp GD lý tưởng cách mạng, đạo đức, lối sống (Bộ GDĐT, 2025)','Khung nội dung cốt lõi và gợi ý tích hợp cho môn Ngữ văn THPT.'],
+      ['SGK Ngữ văn 6–12 và Chuyên đề học tập 10–12, SGK thống nhất','Nguồn: taphuan.nxbgd.vn. Trang web chỉ tóm lược đề mục và dẫn trang, không chép nguyên văn.']
+    ].map(([a,b])=>`<div class="yc"><b>${a}</b><span class="src">${b}</span></div>`).join('')}</div>`;
+  }
+  if(!lf.q)c.querySelectorAll('details.acc').forEach(d=>d.addEventListener('toggle',()=>{if(d.open)c.querySelectorAll('details.acc').forEach(o=>{if(o!==d)o.open=false})}));
+  const fl=$('#f-lop'),fm=$('#f-mach'),fq=$('#f-q');
+  if(fl)fl.onchange=()=>{lf.lop=fl.value;renderLib()};
+  if(fm)fm.onchange=()=>{lf.mach=fm.value;renderLib()};
+  if(fq){fq.oninput=()=>{lf.q=fq.value;clearTimeout(fq._t);fq._t=setTimeout(()=>{renderLib();const n=$('#f-q');n.focus();n.setSelectionRange(n.value.length,n.value.length)},250)}}
+}
+
+document.addEventListener('click',e=>{const m=$('#vb-menu');if(m&&!m.hidden&&!e.target.closest('.dd')){m.hidden=true}});
+document.addEventListener('keydown',e=>{if(e.key==='Escape'){['#obj-ov','#ai-ov'].forEach(k=>{const o=$(k);if(o)o.hidden=true})}if(/INPUT|TEXTAREA|SELECT/.test(e.target.tagName)||$('#v-soan').hidden||!window.__flip||!$('#pg-img'))return;if(e.key==='ArrowLeft')window.__flip(-1);else if(e.key==='ArrowRight')window.__flip(1)});
+/* ---------- boot ---------- */
+fetch('data.json').then(r=>r.json()).then(d=>{D=d;CTM=ctBy();renderGrades();renderLessons();
+  renderContent();setMode('home');
+}).catch(e=>{$('#content').innerHTML=`<div class="sec"><h3>Không tải được dữ liệu</h3><p class="lead">Tải lại trang để thử lại. (${esc(e.message)})</p></div>`});
+})();
+</script>
