@@ -16,7 +16,7 @@
 }
 *{box-sizing:border-box}
 [hidden]{display:none!important}
-body{background:var(--bg);background-image:var(--grad);background-attachment:fixed;min-height:100vh;color:var(--fg);font-family:var(--f-body);font-size:15px;line-height:1.55}
+html{background:var(--bg)}body{background:transparent;min-height:100vh;color:var(--fg);font-family:var(--f-body);font-size:15px;line-height:1.55}
 body::before{content:"";position:fixed;inset:0 0 auto;height:env(safe-area-inset-top,0px);z-index:10;background:var(--panel-solid)}
 .wrap{padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));max-width:1600px;margin:0 auto}
 header{position:sticky;top:env(safe-area-inset-top,0px);z-index:5;background:var(--panel);backdrop-filter:blur(18px) saturate(1.4);-webkit-backdrop-filter:blur(18px) saturate(1.4);border-bottom:1px solid var(--line)}
@@ -291,6 +291,10 @@ h1 em{font-style:italic;background:linear-gradient(90deg,var(--accent-2),var(--a
 .viewer img{border-radius:6px}
 details{background:rgba(255,255,255,.25)}
 :root[data-theme="dark"] details{background:rgba(255,255,255,.03)}
+
+/* hiệu năng cuộn: nền ombre là lớp cố định riêng; kính mờ chỉ giữ cho thanh đầu, khung xem ảnh, menu, hộp nổi */
+body::before{content:'';position:fixed;inset:0;z-index:-1;background:var(--grad);pointer-events:none}
+.sec,.yc,.qg,.tiles button,.stats>div,.picker,.libnav,.note,.mode-card,footer{backdrop-filter:none!important;-webkit-backdrop-filter:none!important}
 </style>
 
 <header><div class="wrap">
