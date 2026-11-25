@@ -429,11 +429,13 @@ function partIds(b,ph){if(ph==='tv'){const t=tvParts(b);return {sgk:t.sgk,ct:t.c
 function setPhan(ph){st.phan=ph;st.vb=null;st.pg=0;const b=D.bai.find(x=>x.id===st.bai);st.sel=new Set(partIds(b,ph).sgk);st.nls=new Set();st.th=new Set();st.thText={};st.open='1';renderContent();window.scrollTo({top:0})}
 const atmFor=ma=>{const nl=ma.split('.').slice(0,2).join('.');return (D.atm?D.atm.nhom:[]).filter(g=>g.nl.includes(nl))};
 function nlsTxt(ma){let t='';D.nls.nang_luc.forEach(n=>Object.values(n.bac).forEach(bb=>bb.chi_bao.forEach(c=>{if(c.ma===ma)t=c.noi_dung})));return t}
-function atmGroups(){const m=new Map();[...st.nls].forEach(ma=>atmFor(ma).forEach(g=>m.set(g.ma,g)));return [...m.values()].sort((a,b)=>a.ma.localeCompare(b.ma))}
+function allNls(){const s=new Set(st.nls);((st.atm&&st.atm.hs)||'').replace(/\b\d\.\d\.(?:CB|TC|NC)\d[a-z]\b/g,x=>s.add(x));return [...s]}
+function atmGroups(){const m=new Map();allNls().forEach(ma=>atmFor(ma).forEach(g=>m.set(g.ma,g)));return [...m.values()].sort((a,b)=>a.ma.localeCompare(b.ma))}
 function renderAtm(){const box=$('#atm-box');if(box){const sel=[...st.nls];
   box.innerHTML=sel.length?`<div class="group-title">Biểu hiện theo bài của chỉ báo đã chọn</div>`+sel.map(ma=>`<div class="write"><label for="nb-${ma}"><span class="code">${ma}</span> ${esc(nlsTxt(ma))}</label><textarea id="nb-${ma}" data-nb="${ma}" placeholder="Biểu hiện cụ thể trong bài, GV tự viết">${esc(st.nlsText[ma]||'')}</textarea></div>`).join(''):'';
   box.querySelectorAll('[data-nb]').forEach(e=>e.oninput=()=>{st.nlsText[e.dataset.nb]=e.value;updateObj()})}
-  const a=$('#atm-sec');if(a){const gs=atmGroups();
+  renderAtmSec()}
+function renderAtmSec(){const a=$('#atm-sec');if(a){const gs=atmGroups();
   a.innerHTML=gs.length?`<div class="group-title">Nhóm an toàn mạng gợi ý</div>`+gs.map(g=>`<p class="src"><span class="tag atm">${g.ma}</span> <b>${esc(g.ten)}</b> · ví dụ: ${esc(g.vi_du)}</p>`).join(''):'<p class="src">Chọn chỉ báo năng lực số ở mục 5, trang sẽ gợi ý nhóm ATM tương ứng.</p>'}}
 function pick(id){
   const b=D.bai.find(x=>x.id===id);st.bai=id;st.phan='doc';st.vb=null;st.pg=0;st.sel=new Set(partIds(b,'doc').sgk);st.nlc={};st.pc={};st.nls=new Set();st.nlsText={};st.atmText={};st.atm={hs:'',qd:'',ct:'',pc:''};st.th=new Set();st.thText={};st.open='1';
@@ -562,7 +564,7 @@ function objRows(){
     nlsSel.forEach(ma=>{const bh=T(st.nlsText[ma]);rows.push({t:ma+' – '+nlsTxt(ma).replace(/\.\s*$/,'')+(bh?': '+bh:'.')})})}
   const A=st.atm,gs=atmGroups().map(g=>g.ma);
   if(T(A.hs)||T(A.qd)||T(A.ct)){rows.push({h2:(nlsSel.length?'d)':'c)')+' Mục tiêu tích hợp an toàn mạng (cấu trúc 3 thành phần)'});
-    rows.push({p:'Học sinh '+T(A.hs)+' (YCCĐ của TT 02'+(nlsSel.length?' – '+nlsSel.join('; '):'')+'); qua đó '+T(A.qd)+' (YCCĐ môn Ngữ văn); cụ thể là '+T(A.ct)+' (yêu cầu ATM'+(gs.length?' – nhóm '+gs.join(', '):'')+').'})}
+    rows.push({p:'Học sinh '+T(A.hs)+' (YCCĐ của TT 02'+(allNls().length?' – '+allNls().join('; '):'')+'); qua đó '+T(A.qd)+' (YCCĐ môn Ngữ văn); cụ thể là '+T(A.ct)+' (yêu cầu ATM'+(gs.length?' – nhóm '+gs.join(', '):'')+').'})}
   rows.push({h:'2. Phẩm chất'});let p=0;
   D.pcnl.pham_chat_chu_yeu.danh_sach.forEach((x,i)=>{const t=T(st.pc[i]);if(t){rows.push({t:x.ten+': '+t});p++}});
   if(T(A.pc)){rows.push({t:T(A.pc)});p++}
@@ -585,7 +587,7 @@ function sugInsert(e){const x=e.target.closest('[data-sgf]');if(!x)return;const 
   if(ta.value.includes(t)){toast('Ô này đã có nội dung đó');return}
   ta.value=ta.value.trim()?ta.value.trim().replace(/[;.,\s]+$/,'')+'; '+t:t;st.atm[f]=ta.value;updateObj();ta.focus()}
 function updateObj(){
-  renderSug();
+  renderSug();renderAtmSec();
   const o=$('#obj');if(!o)return;
   const rows=objRows();
   o.innerHTML=`<div class="objlist">${rows.map(r=>r.h?`<p class="oh">${r.h}</p>`:r.h2?`<p class="oh2">${esc(r.h2)}</p>`:r.p?`<p class="op">${esc(r.p)}</p>`:`<p class="oi${r.e?' empty':''}">${r.e?'':'- '}${esc(r.t)}</p>`).join('')}</div>`;
