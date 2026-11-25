@@ -129,6 +129,8 @@ mark{background:var(--warn-soft);color:inherit;padding:0 2px;border-radius:3px}
 .nx{justify-content:flex-end;margin-top:6px}
 .secs{gap:12px}
 /* ---- v7 refresh ---- */
+.tv-note{margin:8px 0 4px;padding:10px 12px;border-radius:12px;background:var(--warn-soft);color:var(--fg);font-size:14px;line-height:1.5}
+
 .ai-btn .lns{display:flex;flex-direction:column;align-items:center;line-height:1.35}.ai-btn .ln{white-space:nowrap}
 h1,h2,h3,h4,button,.btn,.eyebrow,.group-title,label.item span{text-wrap:balance}
 p,li{text-wrap:pretty}
@@ -421,7 +423,7 @@ function tvParts(b){const L=b.lop;const ttvL=(D.ttv.lop.find(x=>x.lop===L)||{chu
   const ct=[];hits.forEach(h=>(h.lien_quan_ct||[]).forEach(lq=>{const j=(k.ktv||[]).findIndex(x=>x===lq||overlap(lq,x)>=0.8);const id=L+'.KTV.'+(j<0?lq.slice(0,20):j);if(!CTM[id])CTM[id]={noi_dung:j<0?lq:k.ktv[j],mach:'Kiến thức tiếng Việt',trang:''};if(!ct.includes(id))ct.push(id)}));
   return {hits,sgk:ids,ct}}
 function partIds(b,ph){if(ph==='tv'){const t=tvParts(b);return {sgk:t.sgk,ct:t.ct}}
-  const f=id=>CTM[id]&&CTM[id].mach===MACH[ph];return {sgk:b.yccd_sgk_khop_ct.filter(f),ct:b.yccd_ct_sgk_khong_neu.filter(f)}}
+  const f=id=>CTM[id]&&CTM[id].mach===MACH[ph];const v=ph==='doc'&&st.vb!=null&&b.van_ban[st.vb];return {sgk:(v&&v.khop?v.khop:b.yccd_sgk_khop_ct).filter(f),ct:(v&&v.goi?v.goi:b.yccd_ct_sgk_khong_neu).filter(f)}}
 function setPhan(ph){st.phan=ph;st.vb=null;st.pg=0;const b=D.bai.find(x=>x.id===st.bai);st.sel=new Set(partIds(b,ph).sgk);st.nls=new Set();st.th=new Set();st.thText={};st.open='1';renderContent();window.scrollTo({top:0})}
 const atmFor=ma=>{const nl=ma.split('.').slice(0,2).join('.');return (D.atm?D.atm.nhom:[]).filter(g=>g.nl.includes(nl))};
 function nlsTxt(ma){let t='';D.nls.nang_luc.forEach(n=>Object.values(n.bac).forEach(bb=>bb.chi_bao.forEach(c=>{if(c.ma===ma)t=c.noi_dung})));return t}
@@ -450,7 +452,7 @@ function renderContent(){
   let y2=P.ct.map(i=>item(i,'ct')).join('');
   let other='';
   h+=sec('1','Năng lực đặc thù: yêu cầu cần đạt','Chương trình 2018 là gốc · tick để đưa vào mục tiêu',
-    st.phan==='tv'?`<div class="group-title">SGK nêu cho phần tiếng Việt</div>${y1||`<p class="src">Nội dung thực hành: ${esc(b.tv_toc)}.</p>`}${y2?`<div class="group-title">Kiến thức tiếng Việt trong chương trình lớp ${L}</div>${y2}`:''}`
+    st.phan==='tv'?`<div class="group-title">SGK nêu cho phần tiếng Việt</div>${y1||`<p class="src">Nội dung thực hành: ${esc(b.tv_toc)}.</p>`}${!y1&&!y2?`<p class="tv-note">Đây là nội dung luyện tập thêm, yêu cầu cần đạt không được nêu rõ trong SGK bài này và Chương trình tổng thể Ngữ văn lớp ${L}. Thầy Cô vui lòng tự xác định.</p><div class="write"><label for="tv-yc">Yêu cầu cần đạt do Thầy Cô xác định</label><textarea id="tv-yc" placeholder="Ví dụ: Nhận biết và phân tích được tác dụng của biện pháp tu từ … trong văn bản …">${esc((st.tvYc||{})[b.id]||'')}</textarea></div>`:''}${y2?`<div class="group-title">Kiến thức tiếng Việt trong chương trình lớp ${L}</div>${y2}`:''}`
     :`<div class="group-title">SGK có nêu, khớp chương trình</div>${y1||'<p class="empty">Chưa khớp được.</p>'}
      <div class="group-title">Chương trình có cho ${st.phan==='doc'?'thể loại':'mạch'} này, SGK không nêu</div><p class="src">GV cân nhắc bổ sung theo mục tiêu của bài.</p>${y2||'<p class="empty">Không có.</p>'}`);
 
@@ -534,6 +536,7 @@ function bindContent(){
   const vbb=$('#vb-btn'),vbm=$('#vb-menu');if(vbb){vbb.onclick=e=>{e.stopPropagation();vbm.hidden=!vbm.hidden;vbb.setAttribute('aria-expanded',!vbm.hidden)};vbm.querySelectorAll('[data-vbi]').forEach(x=>x.onclick=()=>{st.vb=x.dataset.vbi===''?null:+x.dataset.vbi;st.pg=0;st.pgBai=null;renderContent()})}
   c.querySelectorAll('details.acc').forEach(d=>d.addEventListener('toggle',()=>{if(d.open){st.open=d.dataset.acc;c.querySelectorAll('details.acc').forEach(o=>{if(o!==d)o.open=false})}}));
   c.querySelectorAll('[data-next]').forEach(b=>b.onclick=()=>{const d=c.querySelector(`details.acc[data-acc="${b.dataset.next}"]`);if(d){d.open=true;setTimeout(()=>d.scrollIntoView({behavior:'smooth',block:'start'}),30)}});
+  const ty=$('#tv-yc');if(ty)ty.oninput=()=>{(st.tvYc=st.tvYc||{})[st.bai]=ty.value;updateObj()};
   c.querySelectorAll('[data-atmf]').forEach(e=>e.oninput=()=>{st.atm[e.dataset.atmf]=e.value;updateObj()});
   c.querySelectorAll('[data-nlc]').forEach(e=>e.oninput=()=>{st.nlc[e.dataset.nlc]=e.value;updateObj()});
   c.querySelectorAll('[data-pc]').forEach(e=>e.oninput=()=>{st.pc[e.dataset.pc]=e.value;updateObj()});
@@ -546,6 +549,7 @@ function objRows(){
   rows.push({h:'1. Năng lực'});
   rows.push({h2:'a) Năng lực đặc thù'});let n1=0;
   [...st.sel].forEach(id=>{const y=CTM[id];if(y){rows.push({t:y.noi_dung.replace(/\.\s*$/,'')+(b.lech&&b.lech[id]?` (${b.lech[id]})`:'')+(n1===0?` (Yêu cầu cần đạt, Chương trình Ngữ văn 2018, lớp ${L}).`:'.')});n1++}});
+  const tyc=st.phan==='tv'&&T((st.tvYc||{})[b.id]);if(tyc){rows.push({t:tyc.replace(/\.\s*$/,'')+'.'});n1++}
   if(!n1)rows.push({t:'(chưa chọn yêu cầu cần đạt)',e:1});
   rows.push({h2:'b) Năng lực chung'});let n2=0;
   D.pcnl.nang_luc_chung.danh_sach.forEach((n,i)=>{const t=T(st.nlc[i]);if(t){rows.push({t:n.ten+': '+t});n2++}});
@@ -583,8 +587,9 @@ function renderLib(){
   const n=$('#libnav');n.innerHTML='';
   LIB.forEach(([k,t])=>{const b=document.createElement('button');b.textContent=t;b.setAttribute('aria-pressed',lib===k);b.onclick=()=>{lib=k;store('lib',k);renderLib()};n.appendChild(b)});
   const c=$('#libcontent');
+  if(lib!=='nls'&&lf.lop==='all')lf.lop='10';
   const hl=(t,q)=>{t=esc(t);if(!q)return t;const i=t.toLowerCase().indexOf(q.toLowerCase());return i<0?t:t.slice(0,i)+'<mark>'+t.slice(i,i+q.length)+'</mark>'+t.slice(i+q.length)};
-  const filt=(on)=>`<div class="filters"><select id="f-lop" aria-label="Lớp">${[6,7,8,9,10,11,12].map(l=>`<option ${lf.lop==l?'selected':''}>${l}</option>`).join('')}</select>${on.mach?`<select id="f-mach" aria-label="Mạch"><option value="">Tất cả mạch</option>${['Đọc','Viết','Nói và nghe'].map(m=>`<option ${lf.mach===m?'selected':''}>${m}</option>`).join('')}</select>`:''}<input class="search" id="f-q" placeholder="Tìm trong nội dung…" value="${esc(lf.q)}"></div>`;
+  const filt=(on)=>`<div class="filters"><select id="f-lop" aria-label="Lớp">${on.all?`<option value="all" ${lf.lop==='all'?'selected':''}>Tất cả các bậc</option>`:''}${[6,7,8,9,10,11,12].map(l=>`<option ${lf.lop==l?'selected':''}>${l}</option>`).join('')}</select>${on.mach?`<select id="f-mach" aria-label="Mạch"><option value="">Tất cả mạch</option>${['Đọc','Viết','Nói và nghe'].map(m=>`<option ${lf.mach===m?'selected':''}>${m}</option>`).join('')}</select>`:''}<input class="search" id="f-q" placeholder="Tìm trong nội dung…" value="${esc(lf.q)}"></div>`;
   if(lib==='bai'){
     const T=['một','hai'];
     c.innerHTML=`<div><h2>Danh mục bài học</h2><p class="lead">SGK Ngữ văn thống nhất, theo khối và tập. Bấm tên bài để mở trang soạn KHBD của bài.</p></div><div class="secs">${[6,7,8,9,10,11,12].map(l=>{const bs=D.bai.filter(b=>b.lop===l);return accL(`Ngữ văn ${l}`,bs.length?`${bs.length} bài`:'Đang trích từ SGK',bs.length||null,bs.length?`<div class="tap2">${[1,2].map(t=>`<div><div class="group-title">Tập ${T[t-1]}</div><div class="qg-list" style="--h:${HUE[l]}">${bs.filter(b=>+b.tap===t).map(b=>`<button data-open="${b.id}"><span class="n">${b.bai}</span>${esc(b.ten)}</button>`).join('')}</div></div>`).join('')}</div>`:'<p class="empty">Chưa có dữ liệu bài học lớp này.</p>',false)}).join('')}</div>`;
@@ -609,9 +614,10 @@ function renderLib(){
      ${accL('Năng lực chung','CT tổng thể, mục IX.2',P.nang_luc_chung.danh_sach.length,`${P.nang_luc_chung.danh_sach.map(n=>`<details><summary>${esc(n.ten)}</summary>${n.thanh_phan.map(t=>`<div class="group-title">${esc(t.ten)}</div><b class="src">THCS</b><ul class="plain">${t.thcs.map(x=>`<li>${esc(x)}</li>`).join('')}</ul><b class="src">THPT</b><ul class="plain">${t.thpt.map(x=>`<li>${esc(x)}</li>`).join('')}</ul>`).join('')}</details>`).join('')}`)}</div>
      <p class="src">Năng lực đặc thù: ${P.nang_luc_dac_thu.danh_sach.join(', ')}. ${esc(P.nang_luc_dac_thu.ghi_chu)}</p>`;
   }else if(lib==='nls'){
-    const B=bac(+lf.lop);
-    c.innerHTML=`<div><h2>Năng lực số của học sinh</h2><p class="lead">TT 02/2025/TT-BGDĐT, mã chỉ báo theo CV 3456. Lớp ${lf.lop} dùng bậc ${B}.</p></div>${filt({})}`+
-    '<div class="secs">'+D.nls.mien.map((m,mi)=>{const nls=D.nls.nang_luc.filter(n=>n.mien===m.ten);return accL(`Miền ${mi+1}. ${esc(m.ten)}`,'',nls.length+' năng lực',nls.map(n=>{const cbs=(n.bac[B]?.chi_bao||[]).filter(cb=>!lf.q||cb.noi_dung.toLowerCase().includes(lf.q.toLowerCase())||n.ten.toLowerCase().includes(lf.q.toLowerCase()));return cbs.length?`<details ${lf.q?'open':''}><summary>${n.ma} ${esc(n.ten)}</summary><p class="src">${esc(n.mo_ta)}</p><ul class="plain">${cbs.map(cb=>`<li><span class="code">${cb.ma}</span> ${hl(cb.noi_dung,lf.q)}</li>`).join('')}</ul></details>`:''}).join(''),!!lf.q)}).join('')+'</div>';
+    const ALL=lf.lop==='all',B=ALL?null:bac(+lf.lop),BL=D.nls.bac_theo_lop,BS=ALL?Object.keys(BL):[B];
+    const mq=(n,cb)=>!lf.q||cb.noi_dung.toLowerCase().includes(lf.q.toLowerCase())||n.ten.toLowerCase().includes(lf.q.toLowerCase());
+    c.innerHTML=`<div><h2>Năng lực số của học sinh</h2><p class="lead">TT 02/2025/TT-BGDĐT, mã chỉ báo theo CV 3456. ${ALL?`Đang xem tất cả các bậc: ${BS.map(k=>`${k} (${BL[k].toLowerCase()})`).join(', ')}, để so sánh yêu cầu qua các cấp.`:`Lớp ${lf.lop} dùng bậc ${B}.`}</p></div>${filt({all:1})}`+
+    '<div class="secs">'+D.nls.mien.map((m,mi)=>{const nls=D.nls.nang_luc.filter(n=>n.mien===m.ten);return accL(`Miền ${mi+1}. ${esc(m.ten)}`,'',nls.length+' năng lực',nls.map(n=>{const gs=BS.map(k=>[k,(n.bac[k]?.chi_bao||[]).filter(cb=>mq(n,cb))]).filter(g=>g[1].length);return gs.length?`<details ${lf.q?'open':''}><summary>${n.ma} ${esc(n.ten)}</summary><p class="src">${esc(n.mo_ta)}</p>${gs.map(([k,cbs])=>`${ALL?`<div class="group-title">Bậc ${k} · ${esc(BL[k])}</div>`:''}<ul class="plain">${cbs.map(cb=>`<li><span class="code">${cb.ma}</span> ${hl(cb.noi_dung,lf.q)}</li>`).join('')}</ul>`).join('')}</details>`:''}).join(''),!!lf.q)}).join('')+'</div>';
   }else if(lib==='atm'){
     const A=D.atm;
     c.innerHTML=`<div><h2>An toàn mạng: tám nhóm nội dung cốt lõi</h2><p class="lead">${esc(A.nguon)}</p></div><div class="atm-grid">${A.nhom.map(g=>`<div class="yc"><div class="row"><span class="tag atm">${g.ma}</span><span class="src">Mã NL: ${g.nl.join('; ')}</span></div><b>${esc(g.ten)}</b><span class="src">${esc(g.vi_du)}</span><div class="row">${g.nl.map(n=>{const x=D.nls.nang_luc.find(y=>y.ma===n);return `<span class="tag" title="${x?esc(x.ten):''}">${n}${x?' '+esc(x.ten):''}</span>`}).join('')}</div></div>`).join('')}</div><p class="src">Cách ghi trong kế hoạch bài dạy: mã nhóm ATM đặt trong ngoặc cuối dòng năng lực số, kèm yêu cầu an toàn mạng quan sát được trong bài.</p>`;
