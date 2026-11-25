@@ -513,7 +513,7 @@ function renderContent(){
   const modal=`<button class="fab" id="obj-open"><span class="fab-i">▦</span><span><b>Mục tiêu bài học</b><span id="fab-n"></span></span></button>
   <div class="ov" id="ai-ov" hidden><div class="modal ai-modal" role="dialog" aria-modal="true" aria-labelledby="ai-h"><div class="row" style="justify-content:space-between;align-items:flex-start"><div><p class="eyebrow">Trợ lý thông minh</p><h2 id="ai-h">Cùng lên ý tưởng bài dạy</h2></div><button class="x" id="ai-close" aria-label="Đóng">×</button></div><p class="lead">Trợ lý sẽ dựa trên bài, phần dạy và các mục tiêu thầy cô đã chọn để gợi ý ý tưởng hoạt động. Thầy cô là người quyết định và viết kế hoạch bài dạy.</p><ul class="plain"><li>Dùng khóa API của chính thầy cô, chỉ lưu trên trình duyệt của máy đang dùng, xóa được bất cứ lúc nào.</li><li>Chỉ gửi nội dung bài học, không gửi tên hay thông tin cá nhân.</li><li>Chỉ bật khi thầy cô cần, phần tra cứu luôn dùng được mà không cần trợ lý.</li></ul><div class="soon">Tính năng đang được hoàn thiện.</div></div></div>
   <div class="ov" id="obj-ov" hidden><div class="modal" role="dialog" aria-modal="true" aria-labelledby="obj-h"><div class="row" style="justify-content:space-between;align-items:flex-start"><div><p class="eyebrow">${esc(PHAN.find(x=>x[0]===st.phan)[1])} · ${vbo?esc(vbo.ten):'Bài '+b.bai+'. '+esc(b.ten)}</p><h2 id="obj-h">Mục tiêu bài học</h2><p class="src">Tổng hợp từ các lựa chọn của thầy cô, dạng liệt kê để sao chép về chỉnh sửa.</p></div><button class="x" id="obj-close" aria-label="Đóng">×</button></div><div class="table-wrap" id="obj"></div><div class="row"><button class="btn" id="copy">Sao chép mục tiêu</button></div></div></div>`;
-  const pages=vbo&&vbo.trang_pdf?[0,1,2,3].map(k=>vbo.trang_pdf+k):[0,1,2,3,4,5].map(k=>b.trang_pdf+k);
+  const pages=vbo&&vbo.trang_pdf?Array.from({length:(vbo.trang_cuoi||vbo.trang_pdf+3)-vbo.trang_pdf+1},(_,k)=>vbo.trang_pdf+k):[0,1,2,3,4,5].map(k=>b.trang_pdf+k);
   const vw=`<aside class="viewer" aria-label="Trang SGK"><div class="row" style="justify-content:space-between"><h3>Trang SGK của bài</h3><span class="src" id="pg-lbl"></span></div><div class="pgwrap"><div class="pg"><img id="pg-img" alt="Trang SGK" ${b.spr?'':`src="sgk/${L}-${b.tap}-${String(pages[0]).padStart(3,'0')}.jpg"`}></div><button class="flip l" id="pg-prev" aria-label="Trang trước">‹</button><button class="flip r" id="pg-next" aria-label="Trang sau">›</button></div><p class="src">Ngữ văn ${L}, tập ${b.tap}. Bấm mũi tên hoặc phím ← → để lật trang, bấm vào trang để phóng to.</p></aside>`;
   c.innerHTML=`<div class="lesson"><div class="secs">${h}</div>${vw}</div>${modal}`;
   const aov=$('#ai-ov');$('#ai-open').onclick=()=>{aov.hidden=false;$('#ai-close').focus()};$('#ai-close').onclick=()=>aov.hidden=true;aov.onclick=e=>{if(e.target===aov)aov.hidden=true};
@@ -526,10 +526,10 @@ function renderContent(){
   bindContent();renderAtm();updateObj();
 }
 const SPR={};
-function setPg(img,b,L,p){const e=b.spr&&b.spr.p.find(x=>x[0]===p);if(!e){img.src=`sgk/${L}-${b.tap}-${String(p).padStart(3,'0')}.jpg`;return}
-  img.dataset.want=b.spr.f+'#'+p;
-  const draw=im=>{if(img.dataset.want!==b.spr.f+'#'+p)return;const cv=document.createElement('canvas');cv.width=e[2];cv.height=e[3];cv.getContext('2d').drawImage(im,0,e[1],e[2],e[3],0,0,e[2],e[3]);img.src=cv.toDataURL('image/jpeg',.92)};
-  let s=SPR[b.spr.f];if(!s){const im=new Image();s=SPR[b.spr.f]={im,ok:false,q:[]};im.onload=()=>{s.ok=true;s.q.splice(0).forEach(f=>f(im))};im.src=b.spr.f}
+function setPg(img,b,L,p){const e=b.spr&&b.spr.p.find(x=>x[0]===p);if(!e){img.removeAttribute('src');img.alt='Chưa có ảnh trang này';return}
+  const sf=Array.isArray(b.spr.f)?b.spr.f[e[4]||0]:b.spr.f;img.dataset.want=sf+'#'+p;
+  const draw=im=>{if(img.dataset.want!==sf+'#'+p)return;const cv=document.createElement('canvas');cv.width=e[2];cv.height=e[3];cv.getContext('2d').drawImage(im,0,e[1],e[2],e[3],0,0,e[2],e[3]);img.src=cv.toDataURL('image/jpeg',.92)};
+  let s=SPR[sf];if(!s){const im=new Image();s=SPR[sf]={im,ok:false,q:[]};im.onload=()=>{s.ok=true;s.q.splice(0).forEach(f=>f(im))};im.src=sf}
   if(s.ok)draw(s.im);else{img.removeAttribute('src');s.q.push(draw)}}
 function bindContent(){
   const c=$('#content');
