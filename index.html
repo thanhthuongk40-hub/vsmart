@@ -73,6 +73,8 @@ ul.plain li{margin:3px 0}
 .write label{font-size:13px;font-weight:600}
 .write input,.write textarea,.search,select{font:inherit;color:var(--fg);background:var(--panel-solid);border:1px solid var(--line);border-radius:8px;padding:8px 10px;width:100%}
 .write textarea{min-height:54px;resize:vertical}
+.sug{display:flex;flex-direction:column;gap:4px;margin-top:2px}.sug .group-title{margin:6px 0 0}.sug details{border:1px solid var(--line);border-radius:10px;padding:4px 10px;background:var(--panel-solid)}.sug summary{cursor:pointer;font-size:13px;padding:4px 0}
+.sg{display:block;width:100%;text-align:left;font:inherit;font-size:13.5px;line-height:1.45;color:var(--fg);background:var(--chip);border:1px dashed var(--line);border-radius:8px;padding:6px 10px;margin:3px 0;cursor:pointer}.sg:hover{border-style:solid;border-color:#8a6fd1}
 .btn{font:inherit;font-weight:600;border:1px solid transparent;background:linear-gradient(135deg,var(--accent),var(--accent-2));color:var(--on-accent);padding:8px 14px;border-radius:8px;cursor:pointer}
 .btn.ghost{background:var(--chip);border-color:var(--line);color:var(--accent)}
 .btn:disabled{opacity:.5;cursor:not-allowed}
@@ -490,8 +492,8 @@ function renderContent(){
   // 6. ATM
   h+=sec('6','Mục tiêu tích hợp an toàn mạng','Cấu trúc 3 thành phần · nhóm ATM gợi ý theo chỉ báo năng lực số đã chọn',`<div id="atm-sec"></div>
     <p class="src">Động từ nên dùng: ${L<=9?'thực hiện, giải thích, tổ chức, thảo luận, đối chiếu, chỉ ra, phân biệt (THCS)':'áp dụng, đánh giá, kiểm chứng, tự đề xuất, lập luận, hướng dẫn người khác (THPT)'}. Tránh: biết, hiểu, nêu được, có ý thức. Yêu cầu ATM là hành vi quan sát được để lấy minh chứng.</p>
-    <div class="write"><label for="atm-hs">Học sinh … (yêu cầu cần đạt của TT 02)</label><textarea id="atm-hs" data-atmf="hs" placeholder="Ví dụ: tổ chức được việc tìm kiếm và đánh giá độ tin cậy của thông tin trên môi trường số">${esc(st.atm.hs)}</textarea></div>
-    <div class="write"><label for="atm-qd">qua đó … (yêu cầu cần đạt môn Ngữ văn)</label><textarea id="atm-qd" data-atmf="qd" placeholder="Ví dụ: viết được văn bản … có lí do và bằng chứng xác thực">${esc(st.atm.qd)}</textarea></div>
+    <div class="write"><label for="atm-hs">Học sinh … (yêu cầu cần đạt của TT 02)</label><textarea id="atm-hs" data-atmf="hs" placeholder="Ví dụ: tổ chức được việc tìm kiếm và đánh giá độ tin cậy của thông tin trên môi trường số">${esc(st.atm.hs)}</textarea><div class="sug" id="sug-hs"></div></div>
+    <div class="write"><label for="atm-qd">qua đó … (yêu cầu cần đạt môn Ngữ văn)</label><textarea id="atm-qd" data-atmf="qd" placeholder="Ví dụ: viết được văn bản … có lí do và bằng chứng xác thực">${esc(st.atm.qd)}</textarea><div class="sug" id="sug-qd"></div></div>
     <div class="write"><label for="atm-ct">cụ thể là … (yêu cầu an toàn mạng quan sát được)</label><textarea id="atm-ct" data-atmf="ct" placeholder="Ví dụ: đề xuất được ít nhất 03 quy tắc nhóm chat lớp về ngôn ngữ, hình ảnh và thông tin cá nhân">${esc(st.atm.ct)}</textarea></div>
     <div class="write"><label for="atm-pc">Phẩm chất gắn với an toàn mạng (nếu có, ghi "Tên: biểu hiện")</label><textarea id="atm-pc" data-atmf="pc" placeholder="Ví dụ: Trách nhiệm công dân số: không chia sẻ hình ảnh, thông tin của người khác khi chưa được đồng ý">${esc(st.atm.pc)}</textarea></div>`);
 
@@ -538,6 +540,7 @@ function bindContent(){
   c.querySelectorAll('[data-next]').forEach(b=>b.onclick=()=>{const d=c.querySelector(`details.acc[data-acc="${b.dataset.next}"]`);if(d){d.open=true;setTimeout(()=>d.scrollIntoView({behavior:'smooth',block:'start'}),30)}});
   const ty=$('#tv-yc');if(ty)ty.oninput=()=>{(st.tvYc=st.tvYc||{})[st.bai]=ty.value;updateObj()};
   c.querySelectorAll('[data-atmf]').forEach(e=>e.oninput=()=>{st.atm[e.dataset.atmf]=e.value;updateObj()});
+  c.querySelectorAll('.sug').forEach(e=>e.onclick=sugInsert);
   c.querySelectorAll('[data-nlc]').forEach(e=>e.oninput=()=>{st.nlc[e.dataset.nlc]=e.value;updateObj()});
   c.querySelectorAll('[data-pc]').forEach(e=>e.oninput=()=>{st.pc[e.dataset.pc]=e.value;updateObj()});
   c.querySelectorAll('[data-nls]').forEach(e=>e.onchange=()=>{if(e.checked){const nl=x=>x.split('.').slice(0,2).join('.');const ds=new Set([...st.nls].map(nl));if(!ds.has(nl(e.dataset.nls))&&ds.size>=3){e.checked=false;toast('Mỗi bài chọn tối đa 3 năng lực thành phần');return}st.nls.add(e.dataset.nls)}else st.nls.delete(e.dataset.nls);renderAtm();updateObj()});
@@ -567,7 +570,22 @@ function objRows(){
   if(st.th.size)rows.push({t:'Nội dung tích hợp: '+[...st.th].map(x=>st.thText[x]).join('; ')});
   return rows;
 }
+function renderSug(){const hs=$('#sug-hs'),qd=$('#sug-qd');if(!hs||!qd)return;
+  const b=D.bai.find(x=>x.id===st.bai);if(!b)return;const B=bac(b.lop),nl=x=>x.split('.').slice(0,2).join('.');
+  const btn=(f,ma,t)=>`<button type="button" class="sg" data-sgf="${f}" data-sgt="${esc(t)}">${ma?`<span class="code">${ma}</span> `:''}${esc(t)}</button>`;
+  const tick=[...st.nls],sugG=new Set(atmGroups().map(g=>g.ma));
+  const grp=g=>{const cbs=g.nl.flatMap(n=>{const x=D.nls.nang_luc.find(y=>y.ma===n);return x?(x.bac[B]?.chi_bao||[]).filter(cb=>!st.nls.has(cb.ma)):[]});return cbs.length?`<details${sugG.has(g.ma)&&!tick.length?' open':''}><summary><span class="tag atm">${g.ma}</span> ${esc(g.ten)}${sugG.has(g.ma)?' · gợi ý theo chỉ báo đã chọn':''}</summary>${cbs.map(cb=>btn('hs',cb.ma,cb.noi_dung)).join('')}</details>`:''};
+  const gs=(D.atm?D.atm.nhom:[]).slice().sort((a,c)=>(sugG.has(c.ma)-sugG.has(a.ma))||a.ma.localeCompare(c.ma));
+  const setH=(el,h)=>{if(el._h!==h){el._h=h;el.innerHTML=h}};
+  setH(hs,`<p class="src">Bấm để chèn nguyên văn chỉ báo TT 02 (bậc ${B}, kèm mã) vào ô, Thầy Cô sửa lại cho khớp bài.</p>`+(tick.length?`<div class="group-title">Chỉ báo năng lực số đã chọn ở mục 5</div>`+tick.map(ma=>btn('hs',ma,nlsTxt(ma))).join(''):'')+`<div class="group-title">Chỉ báo bậc ${B} theo nhóm an toàn mạng</div>`+gs.map(grp).join(''));
+  const ys=[...st.sel].filter(id=>CTM[id]).map(id=>CTM[id].noi_dung),ty=((st.tvYc||{})[b.id]||'').trim();if(ty)ys.push(ty);
+  setH(qd,ys.length?`<p class="src">Yêu cầu cần đạt môn Ngữ văn đã chọn ở mục 1, bấm để chèn vào ô.</p>`+ys.map(t=>btn('qd','',t)).join(''):`<p class="src">Chọn yêu cầu cần đạt ở mục 1, trang sẽ gợi ý tại đây.</p>`)}
+function sugInsert(e){const x=e.target.closest('[data-sgf]');if(!x)return;const f=x.dataset.sgf,ta=$('#atm-'+f);if(!ta)return;
+  const m=x.querySelector('.code'),raw=x.dataset.sgt.trim().replace(/\.\s*$/,'');let t=raw.charAt(0).toLowerCase()+raw.slice(1);if(m)t+=` (${m.textContent})`;
+  if(ta.value.includes(t)){toast('Ô này đã có nội dung đó');return}
+  ta.value=ta.value.trim()?ta.value.trim().replace(/[;.,\s]+$/,'')+'; '+t:t;st.atm[f]=ta.value;updateObj();ta.focus()}
 function updateObj(){
+  renderSug();
   const o=$('#obj');if(!o)return;
   const rows=objRows();
   o.innerHTML=`<div class="objlist">${rows.map(r=>r.h?`<p class="oh">${r.h}</p>`:r.h2?`<p class="oh2">${esc(r.h2)}</p>`:r.p?`<p class="op">${esc(r.p)}</p>`:`<p class="oi${r.e?' empty':''}">${r.e?'':'- '}${esc(r.t)}</p>`).join('')}</div>`;
