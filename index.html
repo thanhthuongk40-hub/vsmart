@@ -5,7 +5,7 @@
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@400;500;600;700&family=Lora:ital,wght@0,500;0,600;1,500&family=JetBrains+Mono:wght@500&display=swap">
 <style>
 /* Layout: thanh trên cố định với 2 chế độ; Soạn KHBD = cột chọn bài bên trái + nội dung bài bên phải; thu thành 1 cột trên điện thoại */
-:root{
+:root{color-scheme:light;
   --bg:#f7f3fb; --grad:radial-gradient(1200px 700px at 0% 0%,#f9d9e6 0%,transparent 60%),radial-gradient(1000px 700px at 100% 10%,#d7e6fb 0%,transparent 55%),radial-gradient(900px 700px at 50% 100%,#dff3ea 0%,transparent 60%),linear-gradient(160deg,#fbf4fb,#f1f5fc);
   --panel:rgba(255,255,255,.62); --panel-solid:#ffffff; --fg:#2a2340; --muted:#665f7c; --line:rgba(98,84,140,.18);
   --accent:#6a3fa0; --accent-2:#c2577f; --accent-soft:rgba(106,63,160,.10); --warn:#a1501e; --warn-soft:rgba(232,150,90,.18);
@@ -14,15 +14,6 @@
   --f-disp:"Lora",Georgia,"Times New Roman",serif;
   --f-code:"JetBrains Mono",ui-monospace,Menlo,Consolas,monospace;
 }
-@media (prefers-color-scheme: dark){:root:not([data-theme="light"]){
-  --bg:#17142a; --grad:radial-gradient(1200px 700px at 0% 0%,#3a2147 0%,transparent 60%),radial-gradient(1000px 700px at 100% 10%,#1f2e52 0%,transparent 55%),radial-gradient(900px 700px at 50% 100%,#173a36 0%,transparent 60%),linear-gradient(160deg,#18142b,#121a2c);
-  --panel:rgba(32,28,54,.62); --panel-solid:#211d38; --fg:#efeaf8; --muted:#b3aacb; --line:rgba(200,185,240,.16);
-  --accent:#c6a5f2; --accent-2:#f29bbd; --accent-soft:rgba(198,165,242,.14); --warn:#f2b27c; --warn-soft:rgba(242,178,124,.16);
-  --chip:rgba(255,255,255,.07); --sel:rgba(198,165,242,.20); --on-accent:#1b1630; color-scheme:dark}}
-:root[data-theme="dark"]{--bg:#17142a; --grad:radial-gradient(1200px 700px at 0% 0%,#3a2147 0%,transparent 60%),radial-gradient(1000px 700px at 100% 10%,#1f2e52 0%,transparent 55%),radial-gradient(900px 700px at 50% 100%,#173a36 0%,transparent 60%),linear-gradient(160deg,#18142b,#121a2c);
-  --panel:rgba(32,28,54,.62); --panel-solid:#211d38; --fg:#efeaf8; --muted:#b3aacb; --line:rgba(200,185,240,.16);
-  --accent:#c6a5f2; --accent-2:#f29bbd; --accent-soft:rgba(198,165,242,.14); --warn:#f2b27c; --warn-soft:rgba(242,178,124,.16);
-  --chip:rgba(255,255,255,.07); --sel:rgba(198,165,242,.20); --on-accent:#1b1630; color-scheme:dark}
 *{box-sizing:border-box}
 [hidden]{display:none!important}
 body{background:var(--bg);background-image:var(--grad);background-attachment:fixed;min-height:100vh;color:var(--fg);font-family:var(--f-body);font-size:15px;line-height:1.55}
@@ -138,6 +129,8 @@ mark{background:var(--warn-soft);color:inherit;padding:0 2px;border-radius:3px}
 .nx{justify-content:flex-end;margin-top:6px}
 .secs{gap:12px}
 /* ---- v7 refresh ---- */
+.item .lech{color:#9a5a2a;font-size:.92em;font-style:italic}
+
 .objlist .op{margin:2px 0 8px}
 
 .tag.atm{background:linear-gradient(135deg,#f2a25c,#e07a5f);color:#fff}
@@ -448,7 +441,7 @@ function renderContent(){
   const P=partIds(b,st.phan);
 
   // 1. YCCĐ
-  const item=(id,flag)=>{const y=CTM[id];if(!y)return'';return `<label class="item"><input type="checkbox" data-y="${id}" ${st.sel.has(id)?'checked':''}><span><span>${esc(y.noi_dung)}</span><span class="meta">${y.sgk?'':`<span class="code">${/KTV/.test(id)?'CT':id}</span>`}<span class="tag">${y.mach}${y.loai_vb?' · '+loaiShort[y.loai_vb]:''}</span>${y.sgk?'<span class="tag ok">Yêu cầu SGK nêu</span>':flag==='sgk'?'<span class="tag ok">SGK có nêu</span>':'<span class="tag warn">SGK không nêu</span>'}${y.trang?`<span class="src">CT tr. ${y.trang}</span>`:''}</span></span></label>`};
+  const item=(id,flag)=>{const y=CTM[id];if(!y)return'';return `<label class="item"><input type="checkbox" data-y="${id}" ${st.sel.has(id)?'checked':''}><span><span>${esc(y.noi_dung)}${b.lech&&b.lech[id]?` <span class="lech">(${esc(b.lech[id])})</span>`:''}</span><span class="meta">${y.sgk?'':`<span class="code">${/KTV/.test(id)?'CT':id}</span>`}<span class="tag">${y.mach}${y.loai_vb?' · '+loaiShort[y.loai_vb]:''}</span>${y.sgk?'<span class="tag ok">Yêu cầu SGK nêu</span>':flag==='sgk'?'<span class="tag ok">SGK có nêu</span>':'<span class="tag warn">SGK không nêu</span>'}${y.trang?`<span class="src">CT tr. ${y.trang}</span>`:''}</span></span></label>`};
   let y1=P.sgk.map(i=>item(i,'sgk')).join('');
   let y2=P.ct.map(i=>item(i,'ct')).join('');
   let other='';
@@ -548,7 +541,7 @@ function objRows(){
   const b=D.bai.find(x=>x.id===st.bai);const L=b.lop;const rows=[];const T=x=>(x||'').trim();
   rows.push({h:'1. Năng lực'});
   rows.push({h2:'a) Năng lực đặc thù'});let n1=0;
-  [...st.sel].forEach(id=>{const y=CTM[id];if(y){rows.push({t:y.noi_dung.replace(/\.\s*$/,'')+(n1===0?` (Yêu cầu cần đạt, Chương trình Ngữ văn 2018, lớp ${L}).`:'.')});n1++}});
+  [...st.sel].forEach(id=>{const y=CTM[id];if(y){rows.push({t:y.noi_dung.replace(/\.\s*$/,'')+(b.lech&&b.lech[id]?` (${b.lech[id]})`:'')+(n1===0?` (Yêu cầu cần đạt, Chương trình Ngữ văn 2018, lớp ${L}).`:'.')});n1++}});
   if(!n1)rows.push({t:'(chưa chọn yêu cầu cần đạt)',e:1});
   rows.push({h2:'b) Năng lực chung'});let n2=0;
   D.pcnl.nang_luc_chung.danh_sach.forEach((n,i)=>{const t=T(st.nlc[i]);if(t){rows.push({t:n.ten+': '+t});n2++}});
